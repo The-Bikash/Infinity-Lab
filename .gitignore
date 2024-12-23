@@ -1,0 +1,50 @@
+# Ignore build directories
+/build/
+/out/
+/bin/
+/Debug/
+/Release/
+
+# Ignore Visual Studio Code specific files
+.vscode/
+
+# Ignore operating system specific files
+.DS_Store
+Thumbs.db
+
+# Ignore compiled C++ binaries
+*.exe
+*.out
+*.app
+*.o
+*.obj
+*.lo
+*.la
+*.dll
+*.so
+*.dylib
+
+# Ignore core dump files
+core*
+
+# Ignore dependency and package manager files (if using any)
+*.log
+*.tgz
+*.tar.gz
+*.zip
+node_modules/
+
+# Ignore IDE settings files
+.idea/
+
+# Ignore CMake or other build system files (if applicable)
+CMakeLists.txt.user
+CMakeCache.txt
+Makefile.user
+Makefile.dSYM/
+
+# Ignore test build folders (if any)
+test_build/
+
+# Ignore other generated files (if applicable)
+*.gch
