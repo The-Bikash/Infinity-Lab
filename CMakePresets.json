@@ -1,0 +1,142 @@
+{
+  "version": 3,
+  "cmakeMinimumRequired": {
+      "major": 3,
+      "minor": 21,
+      "patch": 0
+  },
+
+  "configurePresets": [
+      {
+          "name": "debug-gcc",
+          "generator": "Ninja",
+          "binaryDir": "${sourceDir}/build/debug-gcc",
+          "cacheVariables": {
+              "CMAKE_BUILD_TYPE": "Debug",
+              "CMAKE_EXPORT_COMPILE_COMMANDS": "YES",
+              "CMAKE_VERBOSE_MAKEFILE": "TRUE",
+              "BUILD_SHARED_LIBS": "OFF",
+              "ENABLE_TESTING": "YES"
+          }
+      },
+      {
+          "name": "release-gcc",
+          "generator": "Ninja",
+          "binaryDir": "${sourceDir}/build/release-gcc",
+          "cacheVariables": {
+              "CMAKE_BUILD_TYPE": "Release",
+              "CMAKE_EXPORT_COMPILE_COMMANDS": "YES",
+              "CMAKE_CXX_FLAGS": "-O3 -flto",
+              "CMAKE_C_FLAGS": "-O3 -flto",
+              "BUILD_SHARED_LIBS": "OFF",
+              "ENABLE_TESTING": "NO"
+          }
+      },
+      {
+          "name": "debug-clang",
+          "generator": "Ninja",
+          "binaryDir": "${sourceDir}/build/debug-clang",
+          "cacheVariables": {
+              "CMAKE_BUILD_TYPE": "Debug",
+              "CMAKE_EXPORT_COMPILE_COMMANDS": "YES",
+              "CMAKE_VERBOSE_MAKEFILE": "TRUE",
+              "BUILD_SHARED_LIBS": "OFF",
+              "ENABLE_TESTING": "YES"
+          }
+      },
+      {
+          "name": "release-clang",
+          "generator": "Ninja",
+          "binaryDir": "${sourceDir}/build/release-clang",
+          "cacheVariables": {
+              "CMAKE_BUILD_TYPE": "Release",
+              "CMAKE_EXPORT_COMPILE_COMMANDS": "YES",
+              "CMAKE_CXX_FLAGS": "-O3 -flto",
+              "CMAKE_C_FLAGS": "-O3 -flto",
+              "BUILD_SHARED_LIBS": "OFF",
+              "ENABLE_TESTING": "NO"
+          }
+      },
+      {
+          "name": "debug-msvc",
+          "generator": "Visual Studio 17 2022",
+          "binaryDir": "${sourceDir}/build/debug-msvc",
+          "cacheVariables": {
+              "CMAKE_BUILD_TYPE": "Debug",
+              "CMAKE_EXPORT_COMPILE_COMMANDS": "YES",
+              "BUILD_SHARED_LIBS": "OFF",
+              "ENABLE_TESTING": "YES"
+          }
+      },
+      {
+          "name": "release-msvc",
+          "generator": "Visual Studio 17 2022",
+          "binaryDir": "${sourceDir}/build/release-msvc",
+          "cacheVariables": {
+              "CMAKE_BUILD_TYPE": "Release",
+              "CMAKE_EXPORT_COMPILE_COMMANDS": "YES",
+              "CMAKE_CXX_FLAGS": "/O2 /GL",
+              "CMAKE_C_FLAGS": "/O2 /GL",
+              "BUILD_SHARED_LIBS": "OFF",
+              "ENABLE_TESTING": "NO"
+          }
+      }
+  ],
+
+  "buildPresets": [
+      {
+          "name": "debug-gcc",
+          "configurePreset": "debug-gcc",
+          "jobs": 8
+      },
+      {
+          "name": "release-gcc",
+          "configurePreset": "release-gcc",
+          "jobs": 8
+      },
+      {
+          "name": "debug-clang",
+          "configurePreset": "debug-clang",
+          "jobs": 8
+      },
+      {
+          "name": "release-clang",
+          "configurePreset": "release-clang",
+          "jobs": 8
+      },
+      {
+          "name": "debug-msvc",
+          "configurePreset": "debug-msvc",
+          "jobs": 4
+      },
+      {
+          "name": "release-msvc",
+          "configurePreset": "release-msvc",
+          "jobs": 4
+      }
+  ],
+
+  "testPresets": [
+      {
+          "name": "debug-gcc",
+          "configurePreset": "debug-gcc",
+          "execution": {
+              "verbosity": "verbose"
+          }
+      },
+      {
+          "name": "debug-clang",
+          "configurePreset": "debug-clang",
+          "execution": {
+              "verbosity": "verbose"
+          }
+      },
+      {
+          "name": "debug-msvc",
+          "configurePreset": "debug-msvc",
+          "execution": {
+              "verbosity": "verbose"
+          }
+      }
+  ]
+}

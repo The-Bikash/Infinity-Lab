@@ -2,8 +2,6 @@
 #include<stdio.h>
 
 
-import core;
-import io;
 #define putchar _print
 #define fputs _print
 #define console stdout
