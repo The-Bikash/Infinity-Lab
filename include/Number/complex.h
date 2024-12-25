@@ -180,18 +180,18 @@ namespace alpha {
 			// X = b(c-d), C1 = (a+b), C2 = (a-b), Real = c*c2 + x, Imag = d*c1 + x
 			auto _UFirst = _Get_unwrapped(_First);
 			const auto _ULast = _Get_unwrapped(_Last);
-			const auto _C1 = _ReZ + _ImZ;
-			const auto _C2 = _ReZ - _ImZ;
+			const auto _c1 = _ReZ + _ImZ;
+			const auto _c2 = _ReZ - _ImZ;
 			_Ty _X;
 			for (; _UFirst != _ULast; ++_UFirst) {
 				_X = (*_UFirst)._ReZ;
 				_X -= (*_UFirst)._ImZ;
 				_X *= _ImZ;
 
-				(*_UFirst)._ReZ *= _C2;
+				(*_UFirst)._ReZ *= _c2;
 				(*_UFirst)._ReZ += _X;
 
-				(*_UFirst)._ImZ *= _C1;
+				(*_UFirst)._ImZ *= _c1;
 				(*_UFirst)._ImZ += _X;
 			}
 		}
@@ -209,8 +209,8 @@ namespace alpha {
 			if (this->_ReZ != _Zero) {
 				if (this->_ImZ != _Zero) {
 					_Ty _X;
-					const _Ty _C1 = _ReZ + _ImZ;
-					const _Ty _C2 = _ReZ - _ImZ;
+					const _Ty _c1 = _ReZ + _ImZ;
+					const _Ty _c2 = _ReZ - _ImZ;
 
 					for (; _ULast != _UFirst; --_ULast) {
 						///////////////////////////////////////
@@ -218,9 +218,9 @@ namespace alpha {
 						_X -= _Result._ImZ;				///
 						_X *= _ImZ;						///
 														///
-						_Result._ReZ *= _C2;			///||||-> _Result *= *this; (FFT complex multiplication)
+						_Result._ReZ *= _c2;			///||||-> _Result *= *this; (FFT complex multiplication)
 						_Result._ReZ += _X;				///		  _Result += *_ULast;
-						_Result._ImZ *= _C1;			///
+						_Result._ImZ *= _c1;			///
 						_Result._ImZ += _X;				///
 						///////////////////////////////////////
 						_Result *= *_ULast;
@@ -248,19 +248,19 @@ namespace alpha {
 			_CsqPlusDsq += _X;
 			
 			this->conjugate();
-			const _Ty _C1 = _ReZ + _ImZ;
-			const _Ty _C2 = _ReZ - _ImZ;
+			const _Ty _c1 = _ReZ + _ImZ;
+			const _Ty _c2 = _ReZ - _ImZ;
 			
 			for (; _UFirst != _ULast; ++_UFirst) {
 				_X = (*_UFirst)._ReZ;
 				_X -= (*_UFirst)._ImZ;
 				_X *= _ImZ;
 
-				(*_UFirst)._ReZ *= _C2;
+				(*_UFirst)._ReZ *= _c2;
 				(*_UFirst)._ReZ += _X;
 				(*_UFirst)._ReZ /= _CsqPlusDsq;
 
-				(*_UFirst)._ImZ *= _C1;
+				(*_UFirst)._ImZ *= _c1;
 				(*_UFirst)._ImZ += _X;
 				(*_UFirst)._ImZ /= _CsqPlusDsq;
 			}

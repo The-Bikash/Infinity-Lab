@@ -21,7 +21,7 @@ namespace alpha{
 
     int _print(const unsigned char _Char, FILE* File = stdout)noexcept;
     int _print(const unsigned int _Char, FILE* File = stdout)noexcept;
-    int _print(const unsigned long _var, FILE* File = stdout)noexcept;
+    //int _print(const unsigned long _var, FILE* File = stdout)noexcept;
     int _print(const unsigned long long _var, FILE* File = stdout)noexcept;
     int _print(const char  _Cha, FILE* file = stdout)noexcept;
     int _print(const bool _var, FILE* file = stdout)noexcept;

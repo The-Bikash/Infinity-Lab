@@ -224,14 +224,10 @@ namespace alpha {
 
 		[[nodiscard]] constexpr bool operator==(const Array& _That)noexcept {
 			if (_Siz != _That._Siz) return false;
-			if constexpr (is_arithmetic<_Ty>::value || is_pointer<_Ty>::value) {
-				return alpha::memcmp(_Ptr, _That._Ptr, _Siz * sizeof(_Ty)) == 0;
-			} else {
-				for (SizeType i = 0; i < _Siz; ++i) {
-					if (_Ptr[i] != _That._Ptr[i]) return false;
-				}
-				return true;
+			for (SizeType i = 0; i < _Siz; ++i) {
+				if (_Ptr[i] != _That._Ptr[i]) return false;
 			}
+			return true;
 		}
 		
 		[[nodiscard]] constexpr bool operator!=(const Array& _That)noexcept {
@@ -353,14 +349,14 @@ namespace alpha {
 		}
 
 
-		constexpr void print()const noexcept {
-			_print("\n[", stdout);
-			for (SizeType i = 0; i < _Siz; ++i) {
-				_print(' ', stdout);
-				_print(_Ptr[i], stdout);
-			}
-			_print(" ]", stdout);
-		}
+		// virtual constexpr void print(FILE* file)const noexcept {
+		// 	_print("\n[", file);
+		// 	for (SizeType i = 0; i < _Siz; ++i) {
+		// 		_print(' ', file);
+		// 		_printL(_Ptr[i], file);
+		// 	}
+		// 	_print(" ]", file);
+		// }
 
 		[[nodiscard]] constexpr SizeType size()const {
 			return _Siz;
@@ -634,10 +630,10 @@ namespace alpha {
 		Allocator _Allocator;
 	};
 	
-	template<class _Ty, class _Allocator>
-	void _print(const Array<_Ty, _Allocator>& _Obj)noexcept {
-		_Obj.print();
-	}
+	// template<class _Ty, class _Allocator>
+	// void _print(const Array<_Ty, _Allocator>& _Obj)noexcept {
+	// 	_Obj.print(stdout);
+	// }
 
 	template<class _Ty, class _Allocator = allocator<_Ty>> using LinearContainer = Array<_Ty, _Allocator>;
 

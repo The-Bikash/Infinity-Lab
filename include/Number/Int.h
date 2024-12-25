@@ -3,64 +3,54 @@
 #define __BIG_INT__
 
 #include "../DataStructures/Array.h"
-using _Stype = size_t;
-struct IntImpl;
+using _BlockType = unsigned long long;
+    using _Mtype = long long;
+    using _SignedType = long long;
+    using _Htype = unsigned int;
+    using _SizeType = unsigned long long;
+    using _PointerType = _BlockType*;
 namespace alpha {
-    class Int {
+    class UnsignedInt : public Array<_BlockType> {
     public:
-        Int()noexcept;
-        Int(const _Stype _Size)noexcept;
-        Int(Int&& _That)noexcept;
-        Int(const Int& _That)noexcept;
-
-        ~Int()noexcept;
-
-        constexpr Int& operator=(const _Stype _Size)noexcept;
-        constexpr Int& operator=(Int&& _That)noexcept;
-        constexpr Int& operator=(const Int& _That)noexcept;
-
-
-        [[nodiscard]] constexpr bool operator==(const Int& _That)const noexcept;
-        [[nodiscard]] constexpr bool operator!=(const Int& _That)const noexcept;
-        [[nodiscard]] constexpr bool operator> (const Int& _That)const noexcept;
-        [[nodiscard]] constexpr bool operator< (const Int& _That)const noexcept;
-        [[nodiscard]] constexpr bool operator>=(const Int& _That)const noexcept;
-        [[nodiscard]] constexpr bool operator<=(const Int& _That)const noexcept;
-
-
-        constexpr Int& operator<<=(const _Stype _Shift)noexcept;
-        constexpr Int& operator>>=(const _Stype _Shift)noexcept;
-
-        constexpr Int& operator|=(const Int& _That)noexcept;
-        constexpr Int& operator&=(const Int& _That)noexcept;
-        constexpr Int& operator^=(const Int& _That)noexcept;
-        constexpr Int& operator+=(const Int& _That)noexcept;
-        constexpr Int& operator-=(const Int& _That)noexcept;
-        constexpr Int& operator*=(const Int& _That)noexcept;
-        constexpr Int& operator/=(const Int& _That)noexcept;
-        constexpr Int& operator%=(const Int& _That)noexcept;
-
-
-        [[nodiscard]] Int operator<<(const _Stype that)const noexcept;
-        [[nodiscard]] Int operator>>(const _Stype that)const noexcept;
-        [[nodiscard]] Int operator|(const Int& _That)const noexcept;
-        [[nodiscard]] Int operator&(const Int& _That)const noexcept;
-        [[nodiscard]] Int operator^(const Int& _That)const noexcept;
-        [[nodiscard]] Int operator+(const Int& _That)const noexcept;
-        [[nodiscard]] Int operator-(const Int& _That)const noexcept;
-
+        using Array<_BlockType>::Array;
+        using Array<_BlockType>::operator=;
+    public:
+        UnsignedInt(const char* _Hex);
     private:
-        IntImpl* _Impl;
+        void _Update(_SizeType _Siz)noexcept;
+    public:
+        [[nodiscard]] constexpr bool operator> (const UnsignedInt& _That)const noexcept;
+        [[nodiscard]] constexpr bool operator< (const UnsignedInt& _That)const noexcept;
+        [[nodiscard]] constexpr bool operator>=(const UnsignedInt& _That)const noexcept;
+        [[nodiscard]] constexpr bool operator<=(const UnsignedInt& _That)const noexcept;
+
+
+        constexpr UnsignedInt& operator<<=(const _SizeType _Shift)noexcept;
+        constexpr UnsignedInt& operator>>=(const _SizeType _Shift)noexcept;
+
+        constexpr UnsignedInt& operator|=(const UnsignedInt& _That)noexcept;
+        constexpr UnsignedInt& operator&=(const UnsignedInt& _That)noexcept;
+        constexpr UnsignedInt& operator^=(const UnsignedInt& _That)noexcept;
+        constexpr UnsignedInt& operator+=(const UnsignedInt& _That)noexcept;
+        constexpr UnsignedInt& operator-=(const UnsignedInt& _That)noexcept;
+        constexpr UnsignedInt& operator*=(const UnsignedInt& _That)noexcept;
+        constexpr UnsignedInt& operator/=(const UnsignedInt& _That)noexcept;
+        constexpr UnsignedInt& operator%=(const UnsignedInt& _That)noexcept;
+
+
+        [[nodiscard]] UnsignedInt operator<<(const _SizeType that)const noexcept;
+        [[nodiscard]] UnsignedInt operator>>(const _SizeType that)const noexcept;
+        [[nodiscard]] UnsignedInt operator|(const UnsignedInt& _That)const noexcept;
+        [[nodiscard]] UnsignedInt operator&(const UnsignedInt& _That)const noexcept;
+        [[nodiscard]] UnsignedInt operator^(const UnsignedInt& _That)const noexcept;
+        [[nodiscard]] UnsignedInt operator+(const UnsignedInt& _That)const noexcept;
+        [[nodiscard]] UnsignedInt operator-(const UnsignedInt& _That)const noexcept;
+    public:
+        void print(FILE* file)const;
     };
 
-
-    struct IntImpl : Array<_Stype> {
-        using Array<_Stype>::Array; // Take all constructors from base class
-        using Array<_Stype>::operator=; // Take all assignment from base class
-
-
-
-    };
+    void _print(const UnsignedInt& x);
 }
+
 
 #endif

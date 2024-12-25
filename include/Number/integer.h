@@ -6,9 +6,9 @@
 // import utility;
 
 // export namespace alpha {
-//     using _Type = long long;
+//     using _SignedType = long long;
 //     using _Htype = unsigned long long;
-//     using _Stype = unsigned long long;
+//     using _SizeType = unsigned long long;
 
 //     class UnsignedInt {
 //     public:
@@ -23,13 +23,13 @@
 //         friend inline void mulm(UnsignedInt& _Answ, const UnsignedInt& _First, const UnsignedInt& _Secnd)noexcept;
 
 //         UnsignedInt()noexcept;
-//         UnsignedInt(const _Stype _Size)noexcept;
+//         UnsignedInt(const _SizeType _Size)noexcept;
 //         UnsignedInt(UnsignedInt&& _That)noexcept;
 //         UnsignedInt(const UnsignedInt& _That)noexcept;
 
 //         ~UnsignedInt()noexcept;
 
-//         constexpr UnsignedInt& operator=(const _Stype _Size)noexcept;
+//         constexpr UnsignedInt& operator=(const _SizeType _Size)noexcept;
 //         constexpr UnsignedInt& operator=(UnsignedInt&& _That)noexcept;
 //         constexpr UnsignedInt& operator=(const UnsignedInt& _That)noexcept;
 
@@ -42,8 +42,8 @@
 //         [[nodiscard]] constexpr bool operator<=(const UnsignedInt& _That)const noexcept;
 
 
-//         constexpr UnsignedInt& operator<<=(const _Stype _Shift)noexcept;
-//         constexpr UnsignedInt& operator>>=(const _Stype _Shift)noexcept;
+//         constexpr UnsignedInt& operator<<=(const _SizeType _Shift)noexcept;
+//         constexpr UnsignedInt& operator>>=(const _SizeType _Shift)noexcept;
 
 //         constexpr UnsignedInt& operator|=(const UnsignedInt& _That)noexcept;
 //         constexpr UnsignedInt& operator&=(const UnsignedInt& _That)noexcept;
@@ -55,8 +55,8 @@
 //         constexpr UnsignedInt& operator%=(const UnsignedInt& _That)noexcept;
 
 
-//         [[nodiscard]] UnsignedInt operator<<(const _Stype that)const noexcept;
-//         [[nodiscard]] UnsignedInt operator>>(const _Stype that)const noexcept;
+//         [[nodiscard]] UnsignedInt operator<<(const _SizeType that)const noexcept;
+//         [[nodiscard]] UnsignedInt operator>>(const _SizeType that)const noexcept;
 //         [[nodiscard]] UnsignedInt operator|(const UnsignedInt& _That)const noexcept;
 //         [[nodiscard]] UnsignedInt operator&(const UnsignedInt& _That)const noexcept;
 //         [[nodiscard]] UnsignedInt operator^(const UnsignedInt& _That)const noexcept;

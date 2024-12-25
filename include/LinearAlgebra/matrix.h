@@ -934,9 +934,9 @@ namespace alpha{
 			_Memset(_Arg3);
 		}
 
-		constexpr SquareMat(_Int _Row, MatrixType _Type)noexcept {
+		constexpr SquareMat(_Int _Row, MatrixType _SignedType)noexcept {
 			_AllocateExactly(_Row);
-			switch (_Type) {
+			switch (_SignedType) {
 				case MatrixType::IdentityMatrix: {
 					_Memset(_Zero);
 					for (_Int i = 0; i < _Row; ++i)
