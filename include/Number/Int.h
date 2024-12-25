@@ -4,11 +4,8 @@
 
 #include "../DataStructures/Array.h"
 using _BlockType = unsigned long long;
-    using _Mtype = long long;
-    using _SignedType = long long;
-    using _Htype = unsigned int;
-    using _SizeType = unsigned long long;
-    using _PointerType = _BlockType*;
+using _SizeType = unsigned long long;
+
 namespace alpha {
     class UnsignedInt : public Array<_BlockType> {
     public:

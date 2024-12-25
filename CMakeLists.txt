@@ -15,9 +15,6 @@ file(GLOB SOURCES "${PROJECT_SOURCE_DIR}/src/*.cpp")
 # Add the library target (static library)
 add_library(InfinityLab STATIC ${SOURCES})
 
-# Optional: Set optimization flags (release mode)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
-
 # Enable compile_commands.json generation for IntelliSense
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 

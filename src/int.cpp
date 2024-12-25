@@ -10,7 +10,12 @@
 
 namespace alpha {
 
-    #if __clang__
+    using _MaxType = unsigned long long;
+    using _SignedType = long long;
+    using _Htype = unsigned int;
+    using _SizeType = unsigned long long;
+    using _PointerType = _BlockType*;
+
     static constexpr const auto _shft = 4;              // sizeof(uint128_t) = 16 = 2^4
     static constexpr const auto _hshft = 3;             // sizeof(size_t) = 8 = 2^3
     static constexpr const auto _lsft = 7;              // 128 = 2^7
@@ -18,28 +23,12 @@ namespace alpha {
     static constexpr const auto _byte = 16;             // sizeof(uint128_t) = 16
     static constexpr const auto _bits = 128;            // bits count of uint128_t = 128
     static constexpr const auto _hbits = 64;            // bits count of size_t = 64
-    static constexpr const auto _zero = (_Mtype)(0);
+    static constexpr const auto _zero = (_MaxType)(0);
     static constexpr const auto _Hmax = ULLONG_MAX;
-    static constexpr const auto _Tmax = (((_Mtype)ULLONG_MAX) << 64) | ULLONG_MAX;
     static const char _TotalHex = 16; // 16 * 4 = 64, this signifies that one block can store 16 length hex integer
     static const char _shift = 64 - 4;
-    static const _BlockType _Tmax = 0xffffffffffffffff; // _Maximum can store unsigned long long data type.
+    static const _MaxType _Tmax = -1; // _Maximum can store unsigned long long data type.
     static const _BlockType _mask = 0xf000000000000000;
-    #else
-    static constexpr const auto _shft = 3;              // sizeof(uint64_t) = 8 = 2^3
-    static constexpr const auto _hshft = 2;             // sizeof(uint32_t) = 4 = 2^2
-    static constexpr const auto _lsft = 6;              // 64 = 2^6
-    static constexpr const auto _hlsft = 5;             // 32 = 2^5
-    static constexpr const auto _byte = 8;              // sizeof(uint64_t) = 8
-    static constexpr const auto _bits = 64;             // bits count of uint64_t = 64
-    static constexpr const auto _hbits = 32;            // bits count of uint32_t = 32
-    static constexpr const auto _zero = (_Mtype)(0);
-    static constexpr const unsigned  _Hmax = -1;
-    static constexpr const unsigned long long _Tmax = -1;
-    static const char _TotalHex = 8; // 8 * 4 = 32
-    static const char _shift = 32 - 4;
-    static const _BlockType _mask = 0xf0000000;
-    #endif
 
 
     [[nodiscard]] inline constexpr bool UnsignedInt::operator> (const UnsignedInt& _That)const noexcept {
@@ -296,8 +285,8 @@ void _TransformHexToInt(const char* _Hex, _SizeType _Len, _BlockType* _Ptr){
 UnsignedInt::UnsignedInt (const char* _Hex){
     _SizeType _Len = strlen(_Hex);
     _Hex = _Refine(_Hex, &_Len);
-
-    _Allocate(_Len / _TotalHex + 1);
+    _Siz = _Len / _TotalHex + 1;
+    _Allocate(_Siz);
     _TransformHexToInt(_Hex, _Len, _Ptr);
 }
 
@@ -362,8 +351,8 @@ void _print(const UnsignedInt& x) {
 //     void _print(const UnsignedInt& _That)noexcept {
 //         char _Buff[_bits + 1]{};
 //         _Buff[_bits] = '\0';
-//         _Mtype _Mask = 0;
-//         _Mtype _Tmp = 1; _Tmp <<= (_bits - 1);
+//         _MaxType _Mask = 0;
+//         _MaxType _Tmp = 1; _Tmp <<= (_bits - 1);
 //         for (_SignedType i = _That._Siz - 1; i >= 0; --i) {
 //             _Mask = _Tmp;
 //             for (auto j = 0; j < _bits; ++j) {
@@ -375,9 +364,9 @@ void _print(const UnsignedInt& x) {
 //     }
 
 //     inline void Add(UnsignedInt& _Answr, const UnsignedInt& _First, const UnsignedInt& _Secnd)noexcept {
-//         _Mtype* _This = 0;
+//         _MaxType* _This = 0;
 //         _SizeType  _Siza = 0;
-//         _Mtype* _That = 0;
+//         _MaxType* _That = 0;
 //         _SizeType  _Sizb = 0;
 
 //         if (_First._Siz >= _Secnd._Siz) {
@@ -425,7 +414,7 @@ void _print(const UnsignedInt& x) {
 //     {
 //         _Answr = _First._Siz + _Secnd._Siz;
 
-//         dynamic_unsigned_int::_Mtype i, j, _Slot, _Cche;
+//         dynamic_unsigned_int::_MaxType i, j, _Slot, _Cche;
 //         auto _Cary = dynamic_unsigned_int::_zero;
 //         auto _Cry1 = false;
 //         auto _Cry2 = false;
@@ -482,7 +471,7 @@ void _print(const UnsignedInt& x) {
 //         auto _Ttsz = _Secnd._Siz << 1; _Ttsz -= (_Ttpt[_Ttsz - 1] == 0);
 
 //         dynamic_unsigned_int::_Htype _Slot, _Cche, _Vlue = _Ttpt[0], _Cary = 0U;
-//         dynamic_unsigned_int::_Mtype _Blck;
+//         dynamic_unsigned_int::_MaxType _Blck;
 //         dynamic_unsigned_int::_SizeType i, j, I = 0;
 
 //         auto _Cry1 = false;
