@@ -2,6 +2,7 @@
 #ifndef __IO__
 #define __IO__
 #include <cstdio>
+#include "../Core/core.h"
 #include "../Core/utility.h"
 
 namespace alpha{
@@ -33,7 +34,7 @@ namespace alpha{
     int _print(const double _var, FILE* file = stdout)noexcept;
     int _print(const long double _var, FILE* file = stdout)noexcept;
 
-    size_t _print(const void* _Str, size_t _ElementSize, size_t _ElementCount, FILE* file = stdout)noexcept;
+    _SizeType _print(const void* _Str, _SizeType _ElementSize, _SizeType _ElementCount, FILE* file = stdout)noexcept;
 
     int _input(unsigned char& _Char, FILE* file = stdout)noexcept;
     int _input(unsigned int& _Char, FILE* file = stdout)noexcept;

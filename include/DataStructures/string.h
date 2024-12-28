@@ -52,16 +52,16 @@ namespace alpha {
             _ConstructCopy(_Tmp._Ptr + _Siz, _That, _StrSiz);
         }
 
-        //    str& assign(const size_t _N, const char _C)noexcept;
+        //    str& assign(const _SizeType _N, const char _C)noexcept;
 
-        //    str& assign(const char* _Strng, const size_t _Len)noexcept;
+        //    str& assign(const char* _Strng, const _SizeType _Len)noexcept;
 
-        //    str& assign(const str& _That, const size_t _Pos, const size_t _Len)noexcept;
+        //    str& assign(const str& _That, const _SizeType _Pos, const _SizeType _Len)noexcept;
 
 
-        //    str& insert(const size_t _Pos, const char* _That)noexcept;
+        //    str& insert(const _SizeType _Pos, const char* _That)noexcept;
 
-        //    str& insert(const size_t _Pos, const char* _That, const size_t _Len)noexcept;
+        //    str& insert(const _SizeType _Pos, const char* _That, const _SizeType _Len)noexcept;
 
         //    void input()noexcept;
         //    const char* c_str()const noexcept;

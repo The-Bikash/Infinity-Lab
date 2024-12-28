@@ -1,8 +1,9 @@
 #pragma once
+#ifndef __ALPHA_TIME__
+#define __ALPHA_TIME__
 
-#include <time.h>
-#include <iostream>
-#include <chrono>
+#include <ctime>
+#include <cstdio>
 
 auto start = clock();
 auto end = clock();
@@ -25,6 +26,7 @@ inline void time_end() {
 	printf("Time Taken %f. miliseconds\n", elapsed_time);*/
 }
 
+#endif
 
 
 

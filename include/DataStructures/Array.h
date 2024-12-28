@@ -8,7 +8,7 @@
 #include "../Memory/memory.h"
 #include "simd.h"
 
-typedef unsigned long long size_t;
+typedef unsigned long long _SizeType;
 
 namespace alpha {
 	template<class Array>
@@ -42,28 +42,28 @@ namespace alpha {
 			--(*this);
 			return iterator;
 		}
-		constexpr ConstArrayIterator& operator+=(size_t _Off) noexcept {
+		constexpr ConstArrayIterator& operator+=(_SizeType _Off) noexcept {
 			_Ptr += _Off;
 			return *this;
 		}
-		[[nodiscard]] constexpr ConstArrayIterator operator+(size_t _Off) noexcept {
+		[[nodiscard]] constexpr ConstArrayIterator operator+(_SizeType _Off) noexcept {
 			ConstArrayIterator _Tmp = *this;
 			_Tmp += _Off;
 			return _Tmp;
 		}
-		constexpr ConstArrayIterator& operator-=(size_t _Off) noexcept {
+		constexpr ConstArrayIterator& operator-=(_SizeType _Off) noexcept {
 			_Ptr -= _Off;
 			return *this;
 		}
-		[[nodiscard]] constexpr ConstArrayIterator operator-(size_t _Off) noexcept {
+		[[nodiscard]] constexpr ConstArrayIterator operator-(_SizeType _Off) noexcept {
 			ConstArrayIterator _Tmp = *this;
 			_Tmp -= _Off;
 			return _Tmp;
 		}
-		[[nodiscard]] constexpr size_t operator-(ConstArrayIterator _That)noexcept {
+		[[nodiscard]] constexpr _SizeType operator-(ConstArrayIterator _That)noexcept {
 			return _Ptr - _That._Ptr;
 		}
-		[[nodiscard]] constexpr _Ref operator[] (size_t index)const noexcept {
+		[[nodiscard]] constexpr _Ref operator[] (_SizeType index)const noexcept {
 			return *(_Ptr + index);
 		}
 		[[nodiscard]] constexpr bool operator==(const ConstArrayIterator& that)const {
@@ -116,31 +116,31 @@ namespace alpha {
 			return _Tmp;
 		}
 
-		constexpr ArrayIterator& operator+=(const size_t _Off) noexcept {
+		constexpr ArrayIterator& operator+=(const _SizeType _Off) noexcept {
 			_Mybase::operator+=(_Off);
 			return *this;
 		}
 
-		[[nodiscard]] constexpr ArrayIterator operator+(const size_t _Off) const noexcept {
+		[[nodiscard]] constexpr ArrayIterator operator+(const _SizeType _Off) const noexcept {
 			ArrayIterator _Tmp = *this;
 			_Tmp += _Off;
 			return _Tmp;
 		}
 
-		constexpr ArrayIterator& operator-=(const size_t _Off) noexcept {
+		constexpr ArrayIterator& operator-=(const _SizeType _Off) noexcept {
 			_Mybase::operator-=(_Off);
 			return *this;
 		}
 
 		using _Mybase::operator-;
 
-		[[nodiscard]] constexpr ArrayIterator operator-(const size_t _Off) const noexcept {
+		[[nodiscard]] constexpr ArrayIterator operator-(const _SizeType _Off) const noexcept {
 			ArrayIterator _Tmp = *this;
 			_Tmp -= _Off;
 			return _Tmp;
 		}
 
-		[[nodiscard]] constexpr reference operator[](const size_t _Off) const noexcept {
+		[[nodiscard]] constexpr reference operator[](const _SizeType _Off) const noexcept {
 			return const_cast<reference>(_Mybase::operator[](_Off));
 		}
 
@@ -161,7 +161,7 @@ namespace alpha {
 		using ConstReference = conditional_t<is_fundamental<_Ty>::value || is_pointer<_Ty>::value, const _Ty, const _Ty&>;
 		using ConstPointer = const _Ty*;
 		using ValueType = _Ty;
-		using SizeType = size_t;
+		using SizeType = _SizeType;
 
 		explicit constexpr Array(const Allocator& allocator = Allocator())noexcept : _Siz(0), _Cap(0), _Ptr(nullptr), _Allocator(allocator) {}
 
@@ -277,7 +277,7 @@ namespace alpha {
 		}
 
 		template<class... _Args>
-		constexpr void emplace(size_t _Pos, _Args&&... _Val) {
+		constexpr void emplace(_SizeType _Pos, _Args&&... _Val) {
 			if constexpr (_debug)
 				if (_Pos > _Siz)
 					__debugbreak();
@@ -450,8 +450,8 @@ namespace alpha {
 		constexpr void swap(Array& _Arg3)noexcept {
 			if (this != &_Arg3) {
 				_Ty*   Tmp_ptr = _Ptr;
-				size_t Tmp_siz = _Siz;
-				size_t Tmp_cap = _Cap;
+				_SizeType Tmp_siz = _Siz;
+				_SizeType Tmp_cap = _Cap;
 
 				_Ptr = _Arg3._Ptr;
 				_Siz = _Arg3._Siz;
@@ -555,7 +555,7 @@ namespace alpha {
 			if constexpr (is_fundamental<_Ty>::value || is_pointer<_Ty>::value)
 				alpha::memcpy(_Dst, _Src, _Size * sizeof(_Ty));
 			else
-				for (size_t _idx = 0; _idx < _Size; ++_idx)
+				for (_SizeType _idx = 0; _idx < _Size; ++_idx)
 					construct(_Dst + _idx, _Src[_idx]);
 		}
 
@@ -586,7 +586,7 @@ namespace alpha {
 			if constexpr (is_fundamental<_Ty>::value || is_pointer<_Ty>::value) {
 				alpha::memcpy(_Dst, _Src, _Size * sizeof(_Ty));
 			} else {
-				for (size_t _idx = 0; _idx < _Size; ++_idx) {
+				for (_SizeType _idx = 0; _idx < _Size; ++_idx) {
 					_Dst[_idx] = _Src[_idx];
 				}
 			}
@@ -612,13 +612,13 @@ namespace alpha {
 			_Siz = _NewSiz;
 		}
 
-		inline constexpr auto _LeftShift(const size_t _Pos, const size_t _Count)noexcept {
-			size_t _NewSiz = _Siz - _Count;
-			for (size_t i = _Pos + 1; i < _Siz; ++i)
+		inline constexpr auto _LeftShift(const _SizeType _Pos, const _SizeType _Count)noexcept {
+			_SizeType _NewSiz = _Siz - _Count;
+			for (_SizeType i = _Pos + 1; i < _Siz; ++i)
 				// you can check here for template type is movable or not.
 				_Ptr[i - _Count] = move(_Ptr[i]);
 			if constexpr (!is_trivially_destructible<_Ty>::value) {
-				for (size_t i = _NewSiz; i < _Siz; ++i)
+				for (_SizeType i = _NewSiz; i < _Siz; ++i)
 					_Ptr[i].~_Ty();
 			}
 			_Siz = _NewSiz;

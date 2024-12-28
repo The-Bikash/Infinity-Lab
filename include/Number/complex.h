@@ -18,7 +18,7 @@ namespace alpha {
 			_ReZ = _That._ReZ;
 			_ImZ = _That._ImZ;
 		}
-		template<typename U = _Ty,typename enable_if_t<!is_arithmetic_v<U>, int> = 0>
+		template<typename U = _Ty, typename alpha::enable_if_t<!is_arithmetic_v<U>, int> = 0>
 		inline constexpr Complex(Complex<_Ty>&& _That)noexcept {
 			_ReZ = move(_That._ReZ);
 			_ImZ = move(_That._ImZ);
@@ -195,7 +195,7 @@ namespace alpha {
 				(*_UFirst)._ImZ += _X;
 			}
 		}
-		template<class _Iterator, class U = _Ty, typename enable_if_t<!is_arithmetic_v<U>, int> = 0>
+		template<class _Iterator, class U = _Ty, typename alpha::enable_if_t<!is_arithmetic_v<U>, int> = 0>
 		constexpr Complex<_Ty> _EvalutePolynomial(_Iterator _First, _Iterator _Last)const noexcept {
 
 			// Evaluting polynomial using horner's method and FFT complex multiplication

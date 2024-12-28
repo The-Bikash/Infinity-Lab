@@ -26,8 +26,8 @@ namespace alpha {
 	class Matrix {
 	private:
 		_Ty* _Mat;
-		size_t _Row, _Col;
-		size_t _Siz;
+		_SizeType _Row, _Col;
+		_SizeType _Siz;
 		inline static const _Ty _Zero = 0;
 		inline static const _Ty unity = 1;
 		enum _ElementaryRowOperation : char {
@@ -35,33 +35,33 @@ namespace alpha {
 		};
 		struct Method {
 			_ElementaryRowOperation o;
-			size_t _Arg1, _Arg2;
+			_SizeType _Arg1, _Arg2;
 			_Ty Tmp;
 		};
 		
-		constexpr void deepCopy(_Ty* a, _Ty* b, size_t range) {
-			for (size_t i = 0; i < range; ++i)
+		constexpr void deepCopy(_Ty* a, _Ty* b, _SizeType range) {
+			for (_SizeType i = 0; i < range; ++i)
 				*(a + i) = *(b + i);
 		}
 
-		constexpr void reallocate(size_t size) {
+		constexpr void reallocate(_SizeType size) {
 			delete[]_Mat; _Siz = size;
 			_Mat = new _Ty[_Siz];
 		}
 
-		Array<Array<size_t>> makeCombi(size_t n, size_t k)const {
-			Array<Array<size_t>> ans;
-			Array<size_t> tmp;
+		Array<Array<_SizeType>> makeCombi(_SizeType n, _SizeType k)const {
+			Array<Array<_SizeType>> ans;
+			Array<_SizeType> tmp;
 			makeCombiUtil(ans, tmp, n, 1, k);
 			return ans;
 		}
 
-		void makeCombiUtil(Array<Array<size_t> >& ans, Array<size_t>& tmp, size_t n, size_t left, size_t _idx)const {
+		void makeCombiUtil(Array<Array<_SizeType> >& ans, Array<_SizeType>& tmp, _SizeType n, _SizeType left, _SizeType _idx)const {
 			if (_idx == 0) {
 				ans.push_back(tmp);
 				return;
 			}
-			for (size_t i = left; i <= n; ++i) {
+			for (_SizeType i = left; i <= n; ++i) {
 				tmp.push_back(i);
 				makeCombiUtil(ans, tmp, n, i + 1, _idx - 1);
 				tmp.pop_back();
@@ -74,19 +74,19 @@ namespace alpha {
 			_Siz = _Row = _Col = 0;
 		}
 
-		constexpr Matrix(const size_t x) {
+		constexpr Matrix(const _SizeType x) {
 			_Mat = new _Ty[_Siz = x * x];
 			_Row = _Col = x;
 		}
 
-		constexpr Matrix(const size_t ROW, const size_t COLUMN) {
+		constexpr Matrix(const _SizeType ROW, const _SizeType COLUMN) {
 			_Mat = new _Ty[_Siz = ROW * COLUMN];
 			_Row = ROW; _Col = COLUMN;
 		}
 
 		constexpr Matrix(const initializer<_Ty>& LIST) {
 			_Row = LIST.size(); _Col = LIST.begin()->size();
-			_Mat = new _Ty[_Siz = _Row * _Col]; size_t index = 0;
+			_Mat = new _Ty[_Siz = _Row * _Col]; _SizeType index = 0;
 			for (const auto& i : LIST)
 				for (const auto& j : i)
 					_Mat[index++] = j;
@@ -111,18 +111,18 @@ namespace alpha {
 			return static_cast<int>(_Row * _Col);
 		}
 
-		constexpr operator size_t(void) {
-			return static_cast<size_t>(_Row * _Col);
+		constexpr operator _SizeType(void) {
+			return static_cast<_SizeType>(_Row * _Col);
 		}
 
-		constexpr void operator = (const size_t x) {
+		constexpr void operator = (const _SizeType x) {
 			if constexpr (x * x > _Siz)
 				reallocate(x * x);
 			_Row = _Col = x;
 		}
 
 		constexpr void operator = (const initializer<_Ty>& LIST) {
-			_Row = LIST.size(); _Col = LIST.begin()->size(); size_t index = 0;
+			_Row = LIST.size(); _Col = LIST.begin()->size(); _SizeType index = 0;
 			if constexpr (_Row * _Col > _Siz)
 				reallocate(_Row * _Col);
 			for (const auto& i : LIST)
@@ -145,34 +145,34 @@ namespace alpha {
 			x._Mat = nullptr; x._Row = 0; x._Col = 0; x._Siz = 0;
 		}
 
-		constexpr void R_M(const size_t i, const _Ty& x) {
+		constexpr void R_M(const _SizeType i, const _Ty& x) {
 			if (i < _Row)
-				for (size_t j = 0; j < _Col; ++j)
+				for (_SizeType j = 0; j < _Col; ++j)
 					_Matrix(i, j) *= x;
 		}
 
-		constexpr void R_D(const size_t i, const _Ty& x) {
+		constexpr void R_D(const _SizeType i, const _Ty& x) {
 			if (i < _Row)
-				for (size_t j = 0; j < _Col; ++j)
+				for (_SizeType j = 0; j < _Col; ++j)
 					_Matrix(i, j) /= x;
 		}
 
-		constexpr void R_PLUS(const size_t i, const size_t j, const _Ty& x) {
+		constexpr void R_PLUS(const _SizeType i, const _SizeType j, const _Ty& x) {
 			if (i < _Row && j < _Row && i != j)
-				for (size_t k = 0; k < _Col; ++k)
+				for (_SizeType k = 0; k < _Col; ++k)
 					_Matrix(i, k) += (x * _Matrix(j, k));
 		}
 
-		constexpr void R_MINUS(const size_t i, const size_t j, const _Ty& x) {
+		constexpr void R_MINUS(const _SizeType i, const _SizeType j, const _Ty& x) {
 			if (i < _Row && j < _Row && i != j)
-				for (size_t k = 0; k < _Col; ++k)
+				for (_SizeType k = 0; k < _Col; ++k)
 					_Matrix(i, k) -= (x * _Matrix(j, k));
 		}
 
-		constexpr void R_SWITCH(const size_t i, const size_t j) {
+		constexpr void R_SWITCH(const _SizeType i, const _SizeType j) {
 			if (i < _Row && j < _Row && i != j) {
 				_Ty Tmp;
-				for (size_t k = 0; k < _Col; ++k) {
+				for (_SizeType k = 0; k < _Col; ++k) {
 					Tmp = _Matrix(i, k);
 					_Matrix(i, k) = _Matrix(j, k);
 					_Matrix(j, k) = Tmp;
@@ -180,34 +180,34 @@ namespace alpha {
 			}
 		}
 
-		constexpr void C_M(const size_t j, const _Ty& x) {
+		constexpr void C_M(const _SizeType j, const _Ty& x) {
 			if constexpr (j < _Col)
-				for (size_t i = 0; i < _Row; ++i)
+				for (_SizeType i = 0; i < _Row; ++i)
 					_Matrix(i, j) *= x;
 		}
 
-		constexpr void C_D(const size_t j, const _Ty& x) {
+		constexpr void C_D(const _SizeType j, const _Ty& x) {
 			if constexpr (j < _Col)
-				for (size_t i = 0; i < _Row; ++i)
+				for (_SizeType i = 0; i < _Row; ++i)
 					_Matrix(i, j) /= x;
 		}
 
-		constexpr void C_PLUS(const size_t i, const size_t j, const _Ty& x) {
+		constexpr void C_PLUS(const _SizeType i, const _SizeType j, const _Ty& x) {
 			if constexpr (i < _Col && j < _Col)
-				for (size_t k = 0; k < _Row; ++k)
+				for (_SizeType k = 0; k < _Row; ++k)
 					_Matrix(k, i) += (x * _Matrix(k, j));
 		}
 
-		constexpr void C_MINUS(const size_t i, const size_t j, const _Ty& x) {
+		constexpr void C_MINUS(const _SizeType i, const _SizeType j, const _Ty& x) {
 			if constexpr (i < _Col && j < _Col)
-				for (size_t k = 0; k < _Row; ++k)
+				for (_SizeType k = 0; k < _Row; ++k)
 					_Matrix(k, i) -= (x * _Matrix(k, j));
 		}
 
-		constexpr void C_SWITCH(const size_t i, const size_t j) {
+		constexpr void C_SWITCH(const _SizeType i, const _SizeType j) {
 			if constexpr (i < _Col && j < _Col && i != j) {
 				_Ty Tmp;
-				for (size_t k = 0; k < _Row; ++k) {
+				for (_SizeType k = 0; k < _Row; ++k) {
 					Tmp = _Matrix(k, i);
 					_Matrix(k, i) = _Matrix(k, j);
 					_Matrix(k, j) = Tmp;
@@ -215,75 +215,75 @@ namespace alpha {
 			}
 		}
 
-		[[nodiscard]] constexpr bool IS_ZERO_ROW(const size_t i)const {
-			for (size_t j = 0; j < _Col; ++j)
+		[[nodiscard]] constexpr bool IS_ZERO_ROW(const _SizeType i)const {
+			for (_SizeType j = 0; j < _Col; ++j)
 				if constexpr (_Matrix(i, j) != _Zero)
 					return false;
 			return true;
 		}
 
-		[[nodiscard]] constexpr bool IS_ZERO_COLUMN(const size_t j)const {
-			for (size_t i = 0; i < _Row; ++i)
+		[[nodiscard]] constexpr bool IS_ZERO_COLUMN(const _SizeType j)const {
+			for (_SizeType i = 0; i < _Row; ++i)
 				if constexpr (_Matrix(i, j) != _Zero)
 					return false;
 			return true;
 		}
 
-		[[nodiscard]] constexpr Matrix r_m(const size_t i, const _Ty& x)const {
+		[[nodiscard]] constexpr Matrix r_m(const _SizeType i, const _Ty& x)const {
 			Matrix Tmp(*this); Tmp.R_M(i, x);
 			return Tmp;
 		}
 
-		[[nodiscard]] constexpr Matrix r_d(const size_t i, const _Ty& x)const {
+		[[nodiscard]] constexpr Matrix r_d(const _SizeType i, const _Ty& x)const {
 			Matrix Tmp(*this); Tmp.R_D(i, x);
 			return Tmp;
 		}
 
-		[[nodiscard]] constexpr Matrix r_plus(const size_t i, const size_t j, const _Ty& x)const {
+		[[nodiscard]] constexpr Matrix r_plus(const _SizeType i, const _SizeType j, const _Ty& x)const {
 			Matrix Tmp(*this); Tmp.R_PLUS(i, j, x);
 			return Tmp;
 		}
 
-		[[nodiscard]] constexpr Matrix r_minus(const size_t i, const size_t j, const _Ty& x)const {
+		[[nodiscard]] constexpr Matrix r_minus(const _SizeType i, const _SizeType j, const _Ty& x)const {
 			Matrix Tmp(*this); Tmp.R_MINUS(i, j, x);
 			return Tmp;
 		}
 
-		[[nodiscard]] constexpr Matrix r_switch(const size_t i, const size_t j)const {
+		[[nodiscard]] constexpr Matrix r_switch(const _SizeType i, const _SizeType j)const {
 			Matrix Tmp(*this); Tmp.R_SWITCH(i, j);
 			return Tmp;
 		}
 
-		[[nodiscard]] constexpr Matrix c_m(const size_t j, const _Ty& x)const {
+		[[nodiscard]] constexpr Matrix c_m(const _SizeType j, const _Ty& x)const {
 			Matrix Tmp(*this); Tmp.C_M(j, x);
 			return Tmp;
 		}
 
-		[[nodiscard]] constexpr Matrix c_d(const size_t j, const _Ty& x)const {
+		[[nodiscard]] constexpr Matrix c_d(const _SizeType j, const _Ty& x)const {
 			Matrix Tmp(*this); Tmp.C_D(j, x);
 			return Tmp;
 		}
 
-		[[nodiscard]] constexpr Matrix c_plus(const size_t i, const size_t j, const _Ty& x)const {
+		[[nodiscard]] constexpr Matrix c_plus(const _SizeType i, const _SizeType j, const _Ty& x)const {
 			Matrix Tmp(*this); Tmp.C_PLUS(i, j, x);
 			return Tmp;
 		}
 
-		[[nodiscard]] constexpr Matrix c_minus(const size_t i, const size_t j, const _Ty& x)const {
+		[[nodiscard]] constexpr Matrix c_minus(const _SizeType i, const _SizeType j, const _Ty& x)const {
 			Matrix Tmp(*this); Tmp.C_MINUS(i, j, x);
 			return Tmp;
 		}
 
-		[[nodiscard]] constexpr Matrix c_switch(const size_t i, const size_t j)const {
+		[[nodiscard]] constexpr Matrix c_switch(const _SizeType i, const _SizeType j)const {
 			Matrix Tmp(*this); Tmp.C_SWITCH(i, j);
 			return Tmp;
 		}
 
 	private:
-		constexpr void C_MAKE(const size_t i, const size_t j, bool x = false) {
+		constexpr void C_MAKE(const _SizeType i, const _SizeType j, bool x = false) {
 			_Ty Tmp = _Matrix(i, j);
 			if constexpr (Tmp != _Zero) {
-				if constexpr (Tmp != unity) R_D(i, Tmp); size_t k;
+				if constexpr (Tmp != unity) R_D(i, Tmp); _SizeType k;
 				if (x == true) k = 0; else k = i + 1;
 				for (k; k < _Row; ++k) {
 					Tmp = _Matrix(k, j);
@@ -294,10 +294,10 @@ namespace alpha {
 		}
 
 	private:
-		constexpr void C_MAKE_SPECIAL(const size_t i, const size_t j, bool x = false) {
+		constexpr void C_MAKE_SPECIAL(const _SizeType i, const _SizeType j, bool x = false) {
 			_Ty Tmp = _Matrix(i, j), Tmpx;
 			if constexpr (Tmp != _Zero) {
-				size_t k; if (x == true) k = 0; else k = i + 1;
+				_SizeType k; if (x == true) k = 0; else k = i + 1;
 				for (k; k < _Row; ++k) {
 					Tmpx = _Matrix(k, j) / Tmp;
 					if constexpr (Tmpx != _Zero)
@@ -308,7 +308,7 @@ namespace alpha {
 
 	public:
 		constexpr void UPPER_TRIANGULAR(void) {
-			size_t i = 0, j = 0, Pivoti = 0, Pivotj = 0, RANGE;
+			_SizeType i = 0, j = 0, Pivoti = 0, Pivotj = 0, RANGE;
 			if constexpr (_Row <= _Col) RANGE = _Row; else RANGE = _Col;
 			for (j = 0; j < RANGE; ++j) {
 				i = Pivoti;
@@ -330,7 +330,7 @@ namespace alpha {
 		}
 
 		constexpr void DIAGONALX(void) {
-			size_t i = 0, j = 0, Pivoti = 0, Pivotj = 0, RANGE;
+			_SizeType i = 0, j = 0, Pivoti = 0, Pivotj = 0, RANGE;
 			if constexpr (_Row <= _Col) RANGE = _Row; else RANGE = _Col;
 			for (j = 0; j < RANGE; ++j) {
 				i = Pivoti;
@@ -352,7 +352,7 @@ namespace alpha {
 		}
 
 		constexpr void REF(void) {
-			size_t i = 0, j = 0, Pivoti = 0, Pivotj = 0, RANGE;
+			_SizeType i = 0, j = 0, Pivoti = 0, Pivotj = 0, RANGE;
 			if constexpr (_Row <= _Col) RANGE = _Row; else RANGE = _Col;
 			for (j = 0; j < RANGE; ++j) {
 				i = Pivoti;
@@ -374,7 +374,7 @@ namespace alpha {
 		}
 
 		constexpr void RREF(void) {
-			size_t i = 0, j = 0, Pivoti = 0, Pivotj = 0, RANGE;
+			_SizeType i = 0, j = 0, Pivoti = 0, Pivotj = 0, RANGE;
 			if constexpr (_Row <= _Col) RANGE = _Row; else RANGE = _Col;
 			for (j = 0; j < RANGE; ++j) {
 				i = Pivoti;
@@ -397,7 +397,7 @@ namespace alpha {
 
 	private:
 		constexpr void RREF_SPECIAL_FOR_INVERSE(list<Method>& x) {
-			size_t i = 0, j = 0, Pivoti = 0, Pivotj = 0, RANGE;
+			_SizeType i = 0, j = 0, Pivoti = 0, Pivotj = 0, RANGE;
 			_Ty Tmp;
 			if (_Row <= _Col) RANGE = _Row; else RANGE = _Col;
 			for (j = 0; j < RANGE; ++j) {
@@ -420,7 +420,7 @@ namespace alpha {
 							x.emplace_back(ROWDIVISION, Pivoti, 0, Tmp);
 							R_D(Pivoti, Tmp);
 						}
-						for (size_t k = 0; k < _Row; ++k) {
+						for (_SizeType k = 0; k < _Row; ++k) {
 							Tmp = _Matrix(k, j);
 							if (Tmp != _Zero) {
 								x.emplace_back(ROWMINUS, k, Pivoti, Tmp);
@@ -435,14 +435,14 @@ namespace alpha {
 
 	public:
 		constexpr void ZERO_MATRIX(void) {
-			size_t RANGE = _Row * _Col;
-			for (size_t i = 0; i < RANGE; ++i)
+			_SizeType RANGE = _Row * _Col;
+			for (_SizeType i = 0; i < RANGE; ++i)
 				__Matrix(i) = _Zero;
 		}
 
 		constexpr void IDENTITY_MATRIX(void) {
-			size_t RANGE = (_Row > _Col) ? _Col : _Row; ZERO_MATRIX();
-			for (size_t i = 0; i < RANGE; ++i)
+			_SizeType RANGE = (_Row > _Col) ? _Col : _Row; ZERO_MATRIX();
+			for (_SizeType i = 0; i < RANGE; ++i)
 				_Matrix(i, i) = unity;
 		}
 
@@ -459,7 +459,7 @@ namespace alpha {
 				*(_Mat + 1) * *(_Mat + 3) * *(_Mat + 8) - // a12a21a33 - 
 				*(_Mat + 0) * *(_Mat + 5) * *(_Mat + 7);  // a11a23a32
 
-			size_t i, j, Pivoti = 0, Pivotj = 0; _Ty DET_ = unity;
+			_SizeType i, j, Pivoti = 0, Pivotj = 0; _Ty DET_ = unity;
 			for (j = 0; j < _Row; ++j) {
 				i = Pivoti;
 				if (_Matrix(i, j) == _Zero) {
@@ -479,7 +479,7 @@ namespace alpha {
 					R_D(Pivoti, Tmp);
 					DET_ *= Tmp;
 				}
-				for (size_t k = Pivoti + 1; k < _Row; ++k) {
+				for (_SizeType k = Pivoti + 1; k < _Row; ++k) {
 					Tmp = _Matrix(k, Pivotj);
 					if (Tmp != _Zero)
 						R_MINUS(k, Pivoti, Tmp);
@@ -492,7 +492,7 @@ namespace alpha {
 	private:
 		[[nodiscard]] constexpr bool INVERSE_SLOW(void) {
 			if (_Row == _Col) {
-				size_t i, j; Matrix x(_Row, 2 * _Row);
+				_SizeType i, j; Matrix x(_Row, 2 * _Row);
 				for (i = 0; i < _Row; ++i)
 					for (j = 0; j < _Col; ++j)
 						x_matrix_(i, j) = _Matrix(i, j);
@@ -513,9 +513,9 @@ namespace alpha {
 			return false;
 		}
 
-		[[nodiscard]] constexpr size_t RANK(void) {
-			size_t Rank = 0; REF();
-			for (size_t i = 0; i < _Row; ++i)
+		[[nodiscard]] constexpr _SizeType RANK(void) {
+			_SizeType Rank = 0; REF();
+			for (_SizeType i = 0; i < _Row; ++i)
 				if (!IS_ZERO_ROW(i)) ++Rank;
 				else break;
 			return Rank;
@@ -524,7 +524,7 @@ namespace alpha {
 	public:
 		[[nodiscard]] constexpr bool Inverse(void) {
 			if (_Row == _Col) {
-				list<Method> Tmp; size_t i;
+				list<Method> Tmp; _SizeType i;
 				RREF_SPECIAL_FOR_INVERSE(Tmp);
 				for (i = 0; i < _Row; ++i)
 					if (_Matrix(i, i) == _Zero) return false;
@@ -542,9 +542,9 @@ namespace alpha {
 		}
 
 		[[nodiscard]] constexpr _Ty trace(void)const {
-			size_t Range = (_Row >= _Col) ? _Col : _Row;
+			_SizeType Range = (_Row >= _Col) ? _Col : _Row;
 			_Ty sum = _Zero;
-			for (size_t i = 0; i < Range; ++i)
+			for (_SizeType i = 0; i < Range; ++i)
 				sum += _Matrix(i, i);
 			return sum;
 		}
@@ -577,7 +577,7 @@ namespace alpha {
 			Matrix Tmp(*this); Tmp.RREF(); return Tmp;
 		}
 
-		[[nodiscard]] constexpr size_t rank(void)const {
+		[[nodiscard]] constexpr _SizeType rank(void)const {
 			return Matrix(*this).RANK();
 		}
 
@@ -594,7 +594,7 @@ namespace alpha {
 		}
 
 		[[nodiscard]] constexpr Matrix transpose(void)const {
-			Matrix Tmp(_Col, _Row); size_t i, j;
+			Matrix Tmp(_Col, _Row); _SizeType i, j;
 			for (i = 0; i < _Row; ++i)
 				for (j = 0; j < _Col; ++j)
 					Tmp_matrix_(j, i) = _Matrix(i, j);
@@ -603,43 +603,43 @@ namespace alpha {
 
 		// 4. Element Access ---------------------------------------------------------------------------------------------
 
-		[[nodiscard]] constexpr const size_t column(void)const {
+		[[nodiscard]] constexpr const _SizeType column(void)const {
 			return _Col;
 		}
-		[[nodiscard]] constexpr const size_t row(void)const {
+		[[nodiscard]] constexpr const _SizeType row(void)const {
 			return _Row;
 		}
-		[[nodiscard]] constexpr _Ty& operator[] (const size_t x) {
+		[[nodiscard]] constexpr _Ty& operator[] (const _SizeType x) {
 			if (x < _Row * _Col)
 				return *(_Mat + x);
 			__debugbreak();
 		}
-		[[nodiscard]] constexpr _Ty& at(const size_t x) {
+		[[nodiscard]] constexpr _Ty& at(const _SizeType x) {
 			if (x < _Row * _Col)
 				return *(_Mat + x);
 			__debugbreak();
 		}
-		[[nodiscard]] constexpr _Ty& at(const size_t i, const size_t j) {
+		[[nodiscard]] constexpr _Ty& at(const _SizeType i, const _SizeType j) {
 			if (i < _Row && j < _Col)
 				return _Matrix(i, j);
 			__debugbreak();
 		}
-		[[nodiscard]] constexpr _Ty& operator () (const size_t x, const size_t y) {
+		[[nodiscard]] constexpr _Ty& operator () (const _SizeType x, const _SizeType y) {
 			if (x <= _Row && y <= _Col && x > 0 && y > 0)
 				return _Matrix((x - 1), (y - 1));
 			__debugbreak();
 		}
-		[[nodiscard]] constexpr const _Ty& at(const size_t x)const {
+		[[nodiscard]] constexpr const _Ty& at(const _SizeType x)const {
 			if (x < _Row * _Col)
 				return *(_Mat + x);
 			__debugbreak();
 		}
-		[[nodiscard]] constexpr const _Ty& at(const size_t i, const size_t j)const {
+		[[nodiscard]] constexpr const _Ty& at(const _SizeType i, const _SizeType j)const {
 			if (i < _Row && j < _Col)
 				return _Matrix(i, j);
 			__debugbreak();
 		}
-		[[nodiscard]] constexpr const _Ty& operator () (const size_t x, const size_t y)const {
+		[[nodiscard]] constexpr const _Ty& operator () (const _SizeType x, const _SizeType y)const {
 			if (x <= _Row && y <= _Col && x > 0 && y > 0)
 				return _Matrix((x - 1), (y - 1));
 			__debugbreak();
@@ -649,9 +649,9 @@ namespace alpha {
 
 		[[nodiscard]] constexpr Matrix operator + (const Matrix& x)const {
 			if (_Row == x._Row && _Col == x._Col) {
-				size_t range = _Row * _Col;
+				_SizeType range = _Row * _Col;
 				Matrix Tmp(_Row, _Col);
-				for (size_t i = 0; i < range; ++i)
+				for (_SizeType i = 0; i < range; ++i)
 					Tmp_matrix__(i) = x_matrix__(i) + __Matrix(i);
 				return Tmp;
 			}
@@ -659,8 +659,8 @@ namespace alpha {
 		}
 		[[nodiscard]] constexpr Matrix operator - (const Matrix& x)const {
 			if (_Row == x._Row && _Col == x._Col) {
-				Matrix Tmp(_Row, _Col); size_t range = _Row * _Col;
-				for (size_t i = 0; i < range; ++i)
+				Matrix Tmp(_Row, _Col); _SizeType range = _Row * _Col;
+				for (_SizeType i = 0; i < range; ++i)
 					Tmp_matrix__(i) = __Matrix(i) - x_matrix__(i);
 				return Tmp;
 			}
@@ -668,7 +668,7 @@ namespace alpha {
 		}
 		[[nodiscard]] constexpr Matrix operator * (const Matrix& x)const {
 			if (_Col == x._Row) {
-				Matrix Tmp(_Row, x._Col); size_t i, j, k; _Ty sum;
+				Matrix Tmp(_Row, x._Col); _SizeType i, j, k; _Ty sum;
 				for (i = 0; i < _Row; ++i) {
 					for (j = 0; j < x._Col; ++j) {
 						sum = _Zero;
@@ -682,16 +682,16 @@ namespace alpha {
 			__debugbreak();
 		}
 		[[nodiscard]] constexpr Matrix operator * (const _Ty& x)const {
-			Matrix Tmp(_Row, _Col); size_t RANGE = _Row * _Col;
-			for (size_t i = 0; i < RANGE; ++i)
+			Matrix Tmp(_Row, _Col); _SizeType RANGE = _Row * _Col;
+			for (_SizeType i = 0; i < RANGE; ++i)
 				Tmp_matrix__(i) = x * __Matrix(i);
 			return Tmp;
 		}
 
-		template<size_t  _SIZE_> [[nodiscard]] constexpr Array<_Ty> operator * (const Array<_Ty>& x)const {
+		template<_SizeType  _SIZE_> [[nodiscard]] constexpr Array<_Ty> operator * (const Array<_Ty>& x)const {
 			if (_Col == x.size()) {
 				Array<_Ty> Tmp(_Row); _Ty* ptr = Tmp.data(); const _Ty* xptr = x.data();
-				size_t i, j; _Ty sum;
+				_SizeType i, j; _Ty sum;
 				for (i = 0; i < _Row; ++i) {
 					sum = _Zero;
 					for (j = 0; j < _Col; ++j)
@@ -705,10 +705,10 @@ namespace alpha {
 
 		// 6. Sub matrices, Minors, Principal Minors ------------------------------------------------------------------------
 
-		[[nodiscard]] constexpr Matrix subMatrix(const Array<size_t>& I, const Array<size_t>& J)const {
-			size_t Tmp_row = I.size();
+		[[nodiscard]] constexpr Matrix subMatrix(const Array<_SizeType>& I, const Array<_SizeType>& J)const {
+			_SizeType Tmp_row = I.size();
 			if (Tmp_row > 0 && Tmp_row <= _Row && Tmp_row == J.size() && *(--I.end()) <= _Row && *(--J.end()) <= _Col) {
-				Matrix Tmp(Tmp_row); size_t _Arg1 = 0, j1 = 0;
+				Matrix Tmp(Tmp_row); _SizeType _Arg1 = 0, j1 = 0;
 				for (const auto& i : I) {
 					j1 = 0;
 					for (const auto& j : J) {
@@ -723,32 +723,32 @@ namespace alpha {
 			//std::cout << "Error in sub matrix computation";
 			exit(0);
 		}
-		[[nodiscard]] constexpr _Ty minor(const Array<size_t>& I, const Array<size_t>& J)const {
+		[[nodiscard]] constexpr _Ty minor(const Array<_SizeType>& I, const Array<_SizeType>& J)const {
 			return subMatrix(I, J).DET();
 		}
-		[[nodiscard]] constexpr _Ty signedMinor(const Array<size_t>& I, const Array<size_t>& J)const {
-			size_t Tmp = 0;
+		[[nodiscard]] constexpr _Ty signedMinor(const Array<_SizeType>& I, const Array<_SizeType>& J)const {
+			_SizeType Tmp = 0;
 			for (const auto& i : I)
 				Tmp += i;
 			for (const auto& i : J)
 				Tmp += i;
 			return (Tmp & 1) ? -subMatrix(I, J).DET() : subMatrix(I, J).DET();
 		}
-		[[nodiscard]] constexpr _Ty complementaryMinor(const Array<size_t>& I, const Array<size_t>& J)const {
-			Array<size_t> Tmpi, Tmpj;
-			size_t indexI = 0, indexJ = 0, sizei = I.size(), sizej = J.size();
+		[[nodiscard]] constexpr _Ty complementaryMinor(const Array<_SizeType>& I, const Array<_SizeType>& J)const {
+			Array<_SizeType> Tmpi, Tmpj;
+			_SizeType indexI = 0, indexJ = 0, sizei = I.size(), sizej = J.size();
 			Tmpi.reserve(_Row - sizei);	Tmpj.reserve(_Row - sizej); --sizei; --sizej;
-			for (size_t i = 1; i <= _Row; ++i) {
+			for (_SizeType i = 1; i <= _Row; ++i) {
 				if (i != I[indexI]) Tmpi.push_back(i); else if (indexI < sizei) ++indexI;
 				if (i != J[indexJ]) Tmpj.push_back(i); else if (indexJ < sizej) ++indexJ;
 			}
 			return subMatrix(Tmpi, Tmpj).DET();
 		}
-		[[nodiscard]] constexpr _Ty signedComplementaryMinor(const Array<size_t>& I, const Array<size_t>& J)const {
-			Array<size_t> Tmpi, Tmpj;
-			size_t indexI = 0, indexJ = 0, Tmp = 0, sizei = I.size(), sizej = J.size();
+		[[nodiscard]] constexpr _Ty signedComplementaryMinor(const Array<_SizeType>& I, const Array<_SizeType>& J)const {
+			Array<_SizeType> Tmpi, Tmpj;
+			_SizeType indexI = 0, indexJ = 0, Tmp = 0, sizei = I.size(), sizej = J.size();
 			Tmpi.reserve(_Row - sizei);	Tmpj.reserve(_Row - sizej); --sizei; --sizej;
-			for (size_t i = 1; i <= _Row; ++i) {
+			for (_SizeType i = 1; i <= _Row; ++i) {
 				if (i != I[indexI]) { Tmpi.push_back(i); Tmp += i; }
 				else if (indexI < sizei) ++indexI;
 				if (i != J[indexJ]) { Tmpj.push_back(i); Tmp += i; }
@@ -756,29 +756,29 @@ namespace alpha {
 			}
 			return (Tmp & 1) ? -subMatrix(Tmpi, Tmpj).DET() : subMatrix(Tmpi, Tmpj).DET();
 		}
-		[[nodiscard]] constexpr _Ty cofactor(const size_t I, const size_t J)const {
-			Array<size_t> Tmpi, Tmpj;
+		[[nodiscard]] constexpr _Ty cofactor(const _SizeType I, const _SizeType J)const {
+			Array<_SizeType> Tmpi, Tmpj;
 			Tmpi.reserve(_Row - 1); Tmpj.reserve(_Row - 1);
-			for (size_t i = 1; i <= _Row; ++i) {
+			for (_SizeType i = 1; i <= _Row; ++i) {
 				if (i != I) Tmpi.push_back(i);
 				if (i != J) Tmpj.push_back(i);
 			}
 			return ((I + J) & 1) ? -subMatrix(Tmpi, Tmpj).DET() : subMatrix(Tmpi, Tmpj).DET();
 		}
-		[[nodiscard]] constexpr _Ty sum_ofPrincipleMinor(const size_t Order)const {
-			Array<Array<size_t>> Tmp = makeCombi(_Row, Order);
+		[[nodiscard]] constexpr _Ty sum_ofPrincipleMinor(const _SizeType Order)const {
+			Array<Array<_SizeType>> Tmp = makeCombi(_Row, Order);
 			_Ty sum = _Zero;
 			for (const auto& i : Tmp)
 				sum += subMatrix(i, i).DET();
 			return sum;
 
-			Array<size_t> v(_Row);
+			Array<_SizeType> v(_Row);
 			iota(v.begin(), v.end(), 1);
-			for_each_combination(v, Order, [&sum, this](const Array<size_t>& i) { sum += this->subMatrix(i, i).DET(); });
+			for_each_combination(v, Order, [&sum, this](const Array<_SizeType>& i) { sum += this->subMatrix(i, i).DET(); });
 			return sum;
 		}
 		[[nodiscard]] constexpr Matrix adj()const {
-			Matrix Tmp(_Row); size_t i, j;
+			Matrix Tmp(_Row); _SizeType i, j;
 			for (i = 0; i < _Row; ++i)
 				for (j = 0; j < _Row; ++j)
 					Tmp_matrix_(j, i) = cofactor(i + 1, j + 1);
@@ -790,7 +790,7 @@ namespace alpha {
 		//[[nodiscard]] constexpr Polynomial<field> characteristicPolynomial()const {
 		//	Array<field> Tmp; field k = -identity;
 		//	Tmp.push_back(identity);
-		//	for (size_t i = 1; i <= ROW_; ++i)
+		//	for (_SizeType i = 1; i <= ROW_; ++i)
 		//		(i & 1) ? Tmp.push_back(-sum_ofPrincipleMinor(i)) : Tmp.push_back(sum_ofPrincipleMinor(i));
 		//	return Polynomial(Tmp);
 		//}
@@ -801,7 +801,7 @@ namespace alpha {
 			if (_Row == _Col) {
 				if (_Row == 2) return *_Mat * *(_Mat + 3) - *(_Mat + 2) * *(_Mat + 1);
 				Matrix Tmp(_Row - 1, _Col - 1);
-				_Ty result(0); size_t i, j, k, m;
+				_Ty result(0); _SizeType i, j, k, m;
 				for (i = 0; i < _Col; ++i) {
 					k = 0;
 					for (j = 0; j < _Col; ++j)
@@ -822,7 +822,7 @@ namespace alpha {
 			}
 		} // NOT RECOMMENDED
 		/*constexpr void print(void)const {
-			size_t  i, j = 0;
+			_SizeType  i, j = 0;
 			for (i = 0; i < _Row; ++i) {
 				std::cout << "\n( ";
 				for (j = 0; j < _Col; ++j)
@@ -831,7 +831,7 @@ namespace alpha {
 			}
 		}*/
 		/*constexpr void scan(void) {
-			size_t i, j;
+			_SizeType i, j;
 			for (i = 0; i < _Row; ++i)
 				for (j = 0; j < _Col; ++j)
 					std::cin >> _Matrix(i, j);
@@ -840,7 +840,7 @@ namespace alpha {
 		_Ty DETERMINATE(const Matrix& x) {
 			if (x._Row == 2) return *x._Mat * *(x._Mat + 3) - *(x._Mat + 2) * *(x._Mat + 1);
 			Matrix Tmp(x._Row - 1, x._Col - 1);
-			_Ty result(0); size_t i, j, k, m;
+			_Ty result(0); _SizeType i, j, k, m;
 			for (i = 0; i < x._Col; ++i) {
 				k = 0;
 				for (j = 0; j < x._Col; ++j)
@@ -1317,7 +1317,7 @@ namespace alpha{
 		}
 
 		constexpr bool Inverse()noexcept {
-			Array<_RowOperation> OperationDataList(static_cast<size_t>(_Row) * _Row);
+			Array<_RowOperation> OperationDataList(static_cast<_SizeType>(_Row) * _Row);
 			if (_StoreOperationData(OperationDataList)) {
 				for (auto& OperationData : OperationDataList) {
 					switch (OperationData._Id) {
@@ -1698,14 +1698,14 @@ namespace alpha{
 	private:
 
 	public:
-		constexpr DiagonalMatrix(size_t _Siz)noexcept {
+		constexpr DiagonalMatrix(_SizeType _Siz)noexcept {
 			_Arr = static_cast<_Ty*>(malloc(_Siz * sizeof(_Ty)));
 			_Row = _Siz;
 		}
 	private:
-		using size_t = size_t;
+		using _SizeType = _SizeType;
 		_Ty* _Arr;
-		size_t _Row;
+		_SizeType _Row;
 
 	};*/
 

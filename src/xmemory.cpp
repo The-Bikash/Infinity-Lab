@@ -11,8 +11,8 @@ namespace alpha {
 
     struct NodeList {
         Node* _Head;
-        size_t _NodeCount;
-        size_t _Size;
+        _SizeType _NodeCount;
+        _SizeType _Size;
 
         ~NodeList()noexcept {
             if (_Head != nullptr) {
@@ -132,9 +132,9 @@ namespace alpha {
             _Free(_Ptr, _idx1);
             return _NewPtr;
         }
-        constexpr char _index(size_t& Size)noexcept {
+        constexpr char _index(_SizeType& Size)noexcept {
             char _idx = 0;
-            size_t size = 1;
+            _SizeType size = 1;
             while (size < Size) {
                 size <<= 1;
                 ++_idx;
@@ -150,8 +150,8 @@ namespace alpha {
         }
     private:
         MemoryChunk _Chunks[64];
-        size_t _CurrentMemoryUseStatus;
-        size_t _CurrentPoolSizeStatus;
+        _SizeType _CurrentMemoryUseStatus;
+        _SizeType _CurrentPoolSizeStatus;
            
     };
 
@@ -160,15 +160,15 @@ namespace alpha {
         return Manager;
     }
 
-    void* allocate(size_t& _Size) {
+    void* allocate(_SizeType& _Size) {
         auto& Manager = _MemoryManager();
         return Manager._Malloc(Manager._index(_Size));
     }
-    void* reallocate(void* _Ptr, size_t _Size, size_t& _NewSize) {
+    void* reallocate(void* _Ptr, _SizeType _Size, _SizeType& _NewSize) {
         auto& Manager = _MemoryManager();
         return Manager._Realloc(_Ptr, Manager._index(_Size), Manager._index(_NewSize));
     }
-    void destroy(void* _Ptr, size_t _Size) {
+    void destroy(void* _Ptr, _SizeType _Size) {
         auto& Manager = _MemoryManager();
         Manager._Free(_Ptr, Manager._index(_Size));
         return;

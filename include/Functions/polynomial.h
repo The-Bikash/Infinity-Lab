@@ -80,10 +80,10 @@ namespace alpha {
 		constexpr Polynomial& operator+=(const Polynomial& _Pol)noexcept override {
 			auto _Size = (this->_Siz >= _Pol._Siz) ? (_Pol._Siz) : (this->_Siz);
 	
-			for (size_t _idx = 0; _idx < _Size; ++_idx) {
+			for (_SizeType _idx = 0; _idx < _Size; ++_idx) {
 				this->_Ptr[_idx] += _Pol._Ptr[_idx];
 			}
-			for (size_t _idx = _Size; _idx < _Pol._Siz; ++_idx) {
+			for (_SizeType _idx = _Size; _idx < _Pol._Siz; ++_idx) {
 				this->emplace_back(_Pol._Ptr[_idx]);
 			}
 			this->_RemoveTrailingZeros();
@@ -93,10 +93,10 @@ namespace alpha {
 		constexpr Polynomial& operator-=(const Polynomial& _Pol)noexcept {
 			auto _Size = (this->_Siz >= _Pol._Siz) ? (_Pol._Siz) : (this->_Siz);
 	
-			for (size_t _idx = 0; _idx < _Size; ++_idx) {
+			for (_SizeType _idx = 0; _idx < _Size; ++_idx) {
 				this->_Ptr[_idx] -= _Pol._Ptr[_idx];
 			}
-			for (size_t _idx = _Size; _idx < _Pol._Siz; ++_idx) {
+			for (_SizeType _idx = _Size; _idx < _Pol._Siz; ++_idx) {
 				this->emplace_back(-_Pol._Ptr[_idx]);
 			}
 			this->_RemoveTrailingZeros();

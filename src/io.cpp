@@ -1,6 +1,6 @@
 #define _CRT_SECURE_NO_WARNINGS
 #include <cstdio>
-
+#include "../include/Io/io.h"
 
 namespace alpha {
 
@@ -917,7 +917,7 @@ namespace alpha {
         return fprintf(file, "%llf", _var);
     }
 
-    size_t _print(const void* _Str, size_t _ElementSize, size_t _ElementCount, FILE* _Stream) noexcept {
+    _SizeType _print(const void* _Str, _SizeType _ElementSize, _SizeType _ElementCount, FILE* _Stream) noexcept {
         return fwrite(_Str, _ElementSize, _ElementCount, _Stream);
     }
 

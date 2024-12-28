@@ -9,7 +9,7 @@
 //import stack;
 //
 //export namespace alpha {
-//	template<class _Ty, size_t _Dim>
+//	template<class _Ty, _SizeType _Dim>
 //	struct _NODE {
 //		_NODE* _Node[_Dim];
 //		_Ty _Val;
@@ -24,7 +24,7 @@
 //		using ConstReference = conditional_t<is_fundamental<_Ty>::value || is_pointer<_Ty>::value, const _Ty, const _Ty&>;
 //		using ConstPointer = const _Ty*;
 //		using ValueType = _Ty;
-//		using SizeType = size_t;
+//		using SizeType = _SizeType;
 //
 //	protected:
 //		using _TreeNode = _NODE<_Ty, 2>;
@@ -44,7 +44,7 @@
 //		using ConstReference = conditional_t<is_fundamental<_Ty>::value || is_pointer<_Ty>::value, const _Ty, const _Ty&>;
 //		using ConstPointer = const _Ty*;
 //		using ValueType = _Ty;
-//		using SizeType = size_t;
+//		using SizeType = _SizeType;
 //		using TreeNode = BinaryTree<_Ty>::_TreeNode;
 //		using BinaryTree<_Ty>::_Root;
 //		using BinaryTree<_Ty>::_Allocator;
@@ -140,7 +140,7 @@
 //		using ConstReference = conditional_t<is_fundamental<_Ty>::value || is_pointer<_Ty>::value, const _Ty, const _Ty&>;
 //		using ConstPointer = const _Ty*;
 //		using ValueType = _Ty;
-//		using SizeType = size_t;
+//		using SizeType = _SizeType;
 //		using TreeNode = BinaryTree<_Ty>::_TreeNode;
 //		using BinaryTree<_Ty>::_Root;
 //		using BinaryTree<_Ty>::_Allocator;

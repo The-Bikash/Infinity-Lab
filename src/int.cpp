@@ -1,7 +1,5 @@
 #include "../include/Number/int.h"
 #include<stdio.h>
-#include<time.h>
-
 
 #define putchar _print
 #define fputs _print
@@ -17,12 +15,12 @@ namespace alpha {
     using _PointerType = _BlockType*;
 
     static constexpr const auto _shft = 4;              // sizeof(uint128_t) = 16 = 2^4
-    static constexpr const auto _hshft = 3;             // sizeof(size_t) = 8 = 2^3
+    static constexpr const auto _hshft = 3;             // sizeof(_SizeType) = 8 = 2^3
     static constexpr const auto _lsft = 7;              // 128 = 2^7
     static constexpr const auto _hlsft = 6;             // 64 = 2^6
     static constexpr const auto _byte = 16;             // sizeof(uint128_t) = 16
     static constexpr const auto _bits = 128;            // bits count of uint128_t = 128
-    static constexpr const auto _hbits = 64;            // bits count of size_t = 64
+    static constexpr const auto _hbits = 64;            // bits count of _SizeType = 64
     static constexpr const auto _zero = (_MaxType)(0);
     static constexpr const auto _Hmax = ULLONG_MAX;
     static const char _TotalHex = 16; // 16 * 4 = 64, this signifies that one block can store 16 length hex integer
@@ -31,83 +29,92 @@ namespace alpha {
     static const _BlockType _mask = 0xf000000000000000;
 
 
-    [[nodiscard]] inline constexpr bool UnsignedInt::operator> (const UnsignedInt& _That)const noexcept {
-        if (_Siz == _That._Siz) {
-            for (_SignedType i = _Siz - 1; i >= 0; --i)
-                if (_Ptr[i] != _That._Ptr[i])
-                    return _Ptr[i] > _That._Ptr[i];
-            return false;
-        }
-        else return _Siz > _That._Siz;
-    }
+    [[nodiscard]] constexpr bool UnsignedInt::operator> (const UnsignedInt& _That)const noexcept {
+        if (_Siz != _That._Siz)
+            return _Siz > _That._Siz;
 
+        for (_SizeType i = _Siz; i-- > 0;) {
+            if (_Ptr[i] != _That._Ptr[i])
+                return _Ptr[i] > _That._Ptr[i];
+        }
+        return false;
+    }
     [[nodiscard]] constexpr bool UnsignedInt::operator< (const UnsignedInt& _That)const noexcept {
         return _That > *this;
     }
-
     [[nodiscard]] constexpr bool UnsignedInt::operator>=(const UnsignedInt& _That)const noexcept {
         return !(_That > *this);
     }
-
     [[nodiscard]] constexpr bool UnsignedInt::operator<=(const UnsignedInt& _That)const noexcept {
         return !(*this > _That);
     }
 
 
-    constexpr UnsignedInt& UnsignedInt::operator<<=(const _SizeType _Shift)noexcept {
-        const auto _Sft = _Shift >> _lsft;
-        const auto _Rft = _Shift - (_Sft << _lsft);
-        const auto _Msz = _Siz + _Sft + 1;
-        if (_Msz >= _Cap)
-            _Reallocate(_Msz);
-        if (_Sft) {
-            memmove(_Ptr + _Sft, _Ptr, _Siz << _shft);
-            memset(_Ptr, 0, _Sft << _shft);
-            _Siz += _Sft;
+    constexpr UnsignedInt& UnsignedInt::operator<<=(const _SizeType _Shift) noexcept {
+        constexpr auto _BlockBits = 8 * sizeof(_Ptr[0]);
+        const auto _BlockShift = _Shift / _BlockBits;
+        const auto _BitShift = _Shift % _BlockBits;
+        const auto _CarryShift = _BlockBits - _BitShift;
+        const bool _HasBitShift = _BitShift != 0;
+        const auto _NewSize = _Siz + _BlockShift + (_HasBitShift ? 1 : 0);
+
+        if (_NewSize > _Cap)
+            _Reallocate(_NewSize);
+
+        if (_BlockShift > 0) {
+            for (_SizeType i = _Siz; i-- > 0;)
+                _Ptr[i + _BlockShift] = _Ptr[i];
+            for (_SizeType i = 0; i < _BlockShift; ++i)
+                _Ptr[i] = 0;
+            _Siz += _BlockShift;
         }
-        if (_Rft) {
-            auto _Rsift = _bits - _Rft;
-            auto _Mask1 = _zero;
-            auto _Mask2 = _zero;
-            for (auto i = _Sft; i < _Siz; ++i) {
-                _Mask2 = _Ptr[i] >> _Rsift;
-                _Ptr[i] = _Ptr[i] << _Rft;
-                _Ptr[i] = _Ptr[i] | _Mask1;
-                _Mask1 = _Mask2;
+
+        if (_HasBitShift) {
+            _SizeType _Carry = 0;
+            for (_SizeType i = _BlockShift; i < _Siz; ++i) {
+                const _SizeType _NextCarry = _Ptr[i] >> _CarryShift;
+                _Ptr[i] = (_Ptr[i] << _BitShift) | _Carry;
+                _Carry = _NextCarry;
             }
-            if (_Mask1) {
-                _Ptr[_Siz] = 0;
-                _Ptr[_Siz] |= _Mask1;
-                ++_Siz;
-            }
-        } return *this;
+            if (_Carry != 0)
+                _Ptr[_Siz++] = _Carry;
+        }
+
+        return *this;
     }
 
+
     constexpr UnsignedInt& UnsignedInt::operator>>=(const _SizeType _Shift)noexcept {
-        const auto _Sft = _Shift >> _lsft;
-        const auto _Rft = _Shift - (_Sft << _lsft);
-        if (_Sft) {
-            if (_Sft >= _Siz) {
+        constexpr auto _BlockBits = 8 * sizeof(_Ptr[0]);
+        const auto _BlockShift = _Shift / _BlockBits;
+        const auto _BitShift = _Shift % _BlockBits;
+        const auto _CarryShift = _BlockBits - _BitShift;
+        const bool _HasBitShift = _BitShift != 0;
+
+
+        if (_BlockShift > 0) {
+            if (_BlockShift >= _Siz) {
                 _Ptr[0] = 0;
                 _Siz = 1;
                 return *this;
             }
-            _Siz -= _Sft;
-            memmove(_Ptr, _Ptr + _Sft, (size_t)_Siz << _shft);
+            _Siz -= _BlockShift;
+            for (_SizeType i = 0; i < _Siz; ++i)
+                _Ptr[i] = _Ptr[i + _BlockShift];
         }
-        if (_Rft) {
-            auto _Rsift = _bits - _Rft;
-            auto _Mask1 = _zero;
-            auto _Mask2 = _zero;
-            for (_SignedType i = _Siz - 1; i >= 0; --i) {
-                _Mask2 = _Ptr[i] << _Rsift;
-                _Ptr[i] = _Ptr[i] >> _Rft;
-                _Ptr[i] = _Ptr[i] | _Mask1;
-                _Mask1 = _Mask2;
+
+        if (_HasBitShift) {
+            _SizeType _Carry = 0;
+            for (_SizeType i = _Siz; i-- > 0; ) {
+                const _SizeType _NextCarry = _Ptr[i] << _CarryShift;
+                _Ptr[i] = (_Ptr[i] >> _BitShift) | _Carry;
+                _Carry = _NextCarry;
             }
             if (_Siz != 1 && _Ptr[_Siz - 1] == 0)
                 --_Siz;
-        } return *this;
+        }
+
+        return *this;
     }
 
     [[nodiscard]] UnsignedInt UnsignedInt::operator<<(const _SizeType that)const noexcept {
@@ -229,17 +236,17 @@ namespace alpha {
 
     
     
-void randomHex(char* buff, _SizeType size) {
-    unsigned int seed = static_cast<unsigned int>(clock());
-    const char hexcode[] = "0123456789abcdef";
-    srand(seed);
-    for (size_t i = 0; i < size; ++i) {
-        seed ^= seed << 13;
-        seed ^= seed >> 17;
-        seed ^= seed << 5;
-        buff[i] = hexcode[seed & 0xF];
-    }
-}
+// void randomHex(char* buff, _SizeType size) {
+//     unsigned int seed = static_cast<unsigned int>(clock());
+//     const char hexcode[] = "0123456789abcdef";
+//     srand(seed);
+//     for (_SizeType i = 0; i < size; ++i) {
+//         seed ^= seed << 13;
+//         seed ^= seed >> 17;
+//         seed ^= seed << 5;
+//         buff[i] = hexcode[seed & 0xF];
+//     }
+// }
 
 _BlockType _Binary(const char _Hex){
     if(_Hex >= '0' && _Hex <= '9') return _Hex - '0';
@@ -519,7 +526,7 @@ void _print(const UnsignedInt& x) {
 //     }*/
 // #endif
 //     /* inline unsigned int* _Addition(unsigned int* _Num1, unsigned int _Siz1, unsigned int* _Num2, unsigned int _Siz2, unsigned int& _Siz) {
-//          auto _Ptr = (unsigned int*)std::malloc((size_t)(_Siz1 + 1) << 2); _Ptr[_Siz1] = 0;
+//          auto _Ptr = (unsigned int*)std::malloc((_SizeType)(_Siz1 + 1) << 2); _Ptr[_Siz1] = 0;
 //          auto _Cary1 = false;
 //          auto _Cary2 = false;
 //          auto _Cache = 0U;
@@ -558,7 +565,7 @@ void _print(const UnsignedInt& x) {
 
 //      dynamic_unsigned_int _Karatsuba1(unsigned int* _Num1, unsigned int* _Num2, unsigned int _Idx) {
 
-//          if (_Idx == 1) return { ((size_t)(*_Num1)) * (*_Num2) };
+//          if (_Idx == 1) return { ((_SizeType)(*_Num1)) * (*_Num2) };
 
 //          auto _Idx1 = _Idx / 2;
 //          auto _Idx2 = _Idx - _Idx1;
@@ -599,7 +606,7 @@ void _print(const UnsignedInt& x) {
 //          auto _Idx1 = _Idx / 2;
 //          auto _Idx2 = _Idx - _Idx1;
 
-//          if (_Idx == 1) return { ((size_t)(*_Num1)) * (*_Num2) };
+//          if (_Idx == 1) return { ((_SizeType)(*_Num1)) * (*_Num2) };
 
 //          dynamic_unsigned_int _BD = _Karatsuba1(_Num1, _Num2, _Idx1);
 //          dynamic_unsigned_int _AC = _Karatsuba1(_Num1 + _Idx1, _Num2 + _Idx1, _Idx2);
@@ -632,8 +639,8 @@ void _print(const UnsignedInt& x) {
 
 //          auto _Size = dynamic_unsigned_int::_Fndsiz(_This._Siz);
 
-//          std::memset(_This._Ptr + _This._Siz, 0, (size_t)(_Size - _This._Siz) << 3);
-//          std::memset(_That._Ptr + _That._Siz, 0, (size_t)(_Size - _That._Siz) << 3);
+//          std::memset(_This._Ptr + _This._Siz, 0, (_SizeType)(_Size - _This._Siz) << 3);
+//          std::memset(_That._Ptr + _That._Siz, 0, (_SizeType)(_Size - _That._Siz) << 3);
 
 //          auto _Num1 = reinterpret_cast<unsigned int*>(_This._Ptr);
 //          auto _Num2 = reinterpret_cast<unsigned int*>(_That._Ptr);

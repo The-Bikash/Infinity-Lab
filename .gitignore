@@ -24,9 +24,6 @@ Thumbs.db
 *.so
 *.dylib
 
-# Ignore core dump files
-core*
-
 # Ignore dependency and package manager files (if using any)
 *.log
 *.tgz

@@ -64,11 +64,11 @@ namespace alpha {
 #define NOSIMD
 #endif
 
-/*   void _memcpy(void* dest, const void* src, size_t size) {
+/*   void _memcpy(void* dest, const void* src, _SizeType size) {
        char* Dest = (char*)dest;
        char* Src = (char*)src;
-       const size_t _Count = size / sizeof(__mxi);
-       const size_t _Size = size - _Count * sizeof(__mxi);
+       const _SizeType _Count = size / sizeof(__mxi);
+       const _SizeType _Size = size - _Count * sizeof(__mxi);
        for (long long i = size - 1; i > size - _Count; --i) {
            Dest[i] = Src[i];
        }
@@ -81,14 +81,14 @@ namespace alpha {
    }*/
 
 
-   void avx_add_vecf (const float* const A, const float* const B, float* const C, const size_t _Count)noexcept {
+   void avx_add_vecf (const float* const A, const float* const B, float* const C, const _SizeType _Count)noexcept {
 #ifdef NOSIMD
-       for (size_t i = 0; i < _Count; ++i)
+       for (_SizeType i = 0; i < _Count; ++i)
            C[i] = A[i] + B[i];
 #else
-       const size_t _chunksize = sizeof(__mx) / sizeof(float);
-       const size_t _chunkcount = _Count / _chunksize;
-       size_t i = 0;
+       const _SizeType _chunksize = sizeof(__mx) / sizeof(float);
+       const _SizeType _chunkcount = _Count / _chunksize;
+       _SizeType i = 0;
 
        for (; i < _chunkcount; ++i) {
            auto _a = _mmx_load_ps(A + i * _chunksize);
@@ -100,14 +100,14 @@ namespace alpha {
            C[i] = A[i] + B[i];
 #endif
    }
-   void avx_sub_vecf (const float* const A, const float* const B, float* const C, const size_t _Count)noexcept {
+   void avx_sub_vecf (const float* const A, const float* const B, float* const C, const _SizeType _Count)noexcept {
 #ifdef NOSIMD
-       for (size_t i = 0; i < _Count; ++i)
+       for (_SizeType i = 0; i < _Count; ++i)
            C[i] = A[i] - B[i];
 #else
-       const size_t _chunksize = sizeof(__mx) / sizeof(float);
-       const size_t _chunkcount = _Count / _chunksize;
-       size_t i = 0;
+       const _SizeType _chunksize = sizeof(__mx) / sizeof(float);
+       const _SizeType _chunkcount = _Count / _chunksize;
+       _SizeType i = 0;
 
        for (; i < _chunkcount; ++i) {
            auto _a = _mmx_load_ps(A + i * _chunksize);
@@ -119,14 +119,14 @@ namespace alpha {
            C[i] = A[i] - B[i];
 #endif
    }
-   void avx_madd_vecf(const float* const A, const float* const B, float* const C, const size_t _Count, const float _Lamda)noexcept {
+   void avx_madd_vecf(const float* const A, const float* const B, float* const C, const _SizeType _Count, const float _Lamda)noexcept {
 #ifdef NOSIMD
-       for (size_t i = 0; i < _Count; ++i)
+       for (_SizeType i = 0; i < _Count; ++i)
            C[i] = A[i] + _Lamda * B[i];
 #else
-       const size_t _chunksize = sizeof(__mx) / sizeof(float);
-       const size_t _chunkcount = _Count / _chunksize;
-       size_t i = 0;
+       const _SizeType _chunksize = sizeof(__mx) / sizeof(float);
+       const _SizeType _chunkcount = _Count / _chunksize;
+       _SizeType i = 0;
        const __mx lamda = _mmx_set1_ps(_Lamda);
        for (; i < _chunkcount; ++i) {
            auto _a = _mmx_load_ps(A + i * _chunksize);
@@ -138,14 +138,14 @@ namespace alpha {
            C[i] = A[i] + _Lamda * B[i];
 #endif
    }
-   void avx_msub_vecf(const float* const A, const float* const B, float* const C, const size_t _Count, const float _Lamda)noexcept {
+   void avx_msub_vecf(const float* const A, const float* const B, float* const C, const _SizeType _Count, const float _Lamda)noexcept {
 #ifdef NOSIMD
-       for (size_t i = 0; i < _Count; ++i)
+       for (_SizeType i = 0; i < _Count; ++i)
            C[i] = A[i] - _Lamda * B[i];
 #else
-       const size_t _chunksize = sizeof(__mx) / sizeof(float);
-       const size_t _chunkcount = _Count / _chunksize;
-       size_t i = 0;
+       const _SizeType _chunksize = sizeof(__mx) / sizeof(float);
+       const _SizeType _chunkcount = _Count / _chunksize;
+       _SizeType i = 0;
        const __mx lamda = _mmx_set1_ps(_Lamda);
        for (; i < _chunkcount; ++i) {
            auto _a = _mmx_load_ps(A + i * _chunksize);
@@ -157,14 +157,14 @@ namespace alpha {
            C[i] = A[i] - _Lamda * B[i];
 #endif
    }
-   void avx_mul_vecf (float* const _Vec, const float _Scalar, const size_t _Count)noexcept {
+   void avx_mul_vecf (float* const _Vec, const float _Scalar, const _SizeType _Count)noexcept {
 #ifdef NOSIMD
-       for (size_t i = 0; i < _Count; ++i)
+       for (_SizeType i = 0; i < _Count; ++i)
            _Vec[i] *= _Scalar;
 #else
-       constexpr const size_t _chunksize = sizeof(__mx) / sizeof(float);
-                 const size_t _Range = _Count - (_chunksize - 1);
-       size_t i = 0;
+       constexpr const _SizeType _chunksize = sizeof(__mx) / sizeof(float);
+                 const _SizeType _Range = _Count - (_chunksize - 1);
+       _SizeType i = 0;
        const __mx lamda = _mmx_set1_ps(_Scalar);
        for (; i < _Range; i += _chunksize) {
            auto _a = _mmx_load_ps(_Vec + i);
@@ -177,14 +177,14 @@ namespace alpha {
 #endif
    }
 
-   void avx_add_vecd (const double* const A, const double* const B, double* const C, const size_t _Count)noexcept {
+   void avx_add_vecd (const double* const A, const double* const B, double* const C, const _SizeType _Count)noexcept {
 #ifdef NOSIMD
-       for (size_t i = 0; i < _Count; ++i)
+       for (_SizeType i = 0; i < _Count; ++i)
            C[i] = A[i] + B[i];
 #else
-       const size_t _chunksize = sizeof(__mxd) / sizeof(double);
-       const size_t _chunkcount = _Count / _chunksize;
-       size_t i = 0;
+       const _SizeType _chunksize = sizeof(__mxd) / sizeof(double);
+       const _SizeType _chunkcount = _Count / _chunksize;
+       _SizeType i = 0;
 
        for (; i < _chunkcount; i++) {
            auto va = _mmx_load_pd(A + i * _chunksize);
@@ -196,14 +196,14 @@ namespace alpha {
            C[i] = A[i] + B[i];
 #endif
    }
-   void avx_sub_vecd (const double* const A, const double* const B, double* const C, const size_t _Count)noexcept {
+   void avx_sub_vecd (const double* const A, const double* const B, double* const C, const _SizeType _Count)noexcept {
 #ifdef NOSIMD
-       for (size_t i = 0; i < _Count; ++i)
+       for (_SizeType i = 0; i < _Count; ++i)
            C[i] = A[i] - B[i];
 #else
-       const size_t _chunksize = sizeof(__mxd) / sizeof(double);
-       const size_t _chunkcount = _Count / _chunksize;
-       size_t i = 0;
+       const _SizeType _chunksize = sizeof(__mxd) / sizeof(double);
+       const _SizeType _chunkcount = _Count / _chunksize;
+       _SizeType i = 0;
 
        for (; i < _chunkcount; i++) {
            auto va = _mmx_load_pd(A + i * _chunksize);
@@ -215,14 +215,14 @@ namespace alpha {
            C[i] = A[i] - B[i];
 #endif
    }
-   void avx_madd_vecd(const double* A, const double* const B, double* const C, const size_t _Count, const double _Lamda)noexcept {
+   void avx_madd_vecd(const double* A, const double* const B, double* const C, const _SizeType _Count, const double _Lamda)noexcept {
 #ifdef NOSIMD
-       for (size_t i = 0; i < _Count; ++i)
+       for (_SizeType i = 0; i < _Count; ++i)
            C[i] = A[i] + _Lamda * B[i];
 #else
-       const size_t _chunksize = sizeof(__mxd) / sizeof(float);
-       const size_t _chunkcount = _Count / _chunksize;
-       size_t i = 0;
+       const _SizeType _chunksize = sizeof(__mxd) / sizeof(float);
+       const _SizeType _chunkcount = _Count / _chunksize;
+       _SizeType i = 0;
        const __mxd lamda = _mmx_set1_pd(_Lamda);
        for (; i < _chunkcount; ++i) {
            auto _a = _mmx_load_pd(A + i * _chunksize);
@@ -234,14 +234,14 @@ namespace alpha {
            C[i] = A[i] + _Lamda * B[i];
 #endif
    }
-   void avx_msub_vecd(const double* const A, const double* const B, double* const C, const size_t _Count, const double _Lamda)noexcept {
+   void avx_msub_vecd(const double* const A, const double* const B, double* const C, const _SizeType _Count, const double _Lamda)noexcept {
 #ifdef NOSIMD
-       for (size_t i = 0; i < _Count; ++i)
+       for (_SizeType i = 0; i < _Count; ++i)
            C[i] = A[i] - _Lamda * B[i];
 #else
-       const size_t _chunksize = sizeof(__mxd) / sizeof(float);
-       const size_t _chunkcount = _Count / _chunksize;
-       size_t i = 0;
+       const _SizeType _chunksize = sizeof(__mxd) / sizeof(float);
+       const _SizeType _chunkcount = _Count / _chunksize;
+       _SizeType i = 0;
        const __mxd lamda = _mmx_set1_pd(_Lamda);
        for (; i < _chunkcount; ++i) {
            auto _a = _mmx_load_pd(A + i * _chunksize);
@@ -253,14 +253,14 @@ namespace alpha {
            C[i] = A[i] - _Lamda * B[i];
 #endif
    }
-   void avx_mul_vecd(double* const _Vec, const double _Scalar, const size_t _Count)noexcept {
+   void avx_mul_vecd(double* const _Vec, const double _Scalar, const _SizeType _Count)noexcept {
 #ifdef NOSIMD
-       for (size_t i = 0; i < _Count; ++i)
+       for (_SizeType i = 0; i < _Count; ++i)
            _Vec[i] *= _Scalar;
 #else
-       constexpr const size_t _chunksize = sizeof(__mxd) / sizeof(double);
-       const size_t _Range = _Count - (_chunksize - 1);
-       size_t i = 0;
+       constexpr const _SizeType _chunksize = sizeof(__mxd) / sizeof(double);
+       const _SizeType _Range = _Count - (_chunksize - 1);
+       _SizeType i = 0;
        const __mxd lamda = _mmx_set1_pd(_Scalar);
        for (; i < _Range; i += _chunksize) {
            auto _a = _mmx_load_pd(_Vec + i);
@@ -273,15 +273,15 @@ namespace alpha {
 #endif
    }
 
-   void avx_sadd_vecf(float* a, float* b, size_t size)noexcept {
+   void avx_sadd_vecf(float* a, float* b, _SizeType size)noexcept {
 #ifdef NOSIMD
-       for (size_t i = 0; i < size; ++i) {
+       for (_SizeType i = 0; i < size; ++i) {
            a[i] += b[i];
        }
 #else
-       const size_t simdSize = 8;  // Number of elements processed in parallel with AVX2
+       const _SizeType simdSize = 8;  // Number of elements processed in parallel with AVX2
 
-       for (size_t i = 0; i < size; i += simdSize) {
+       for (_SizeType i = 0; i < size; i += simdSize) {
            // Load eight single-precision floating-point values from memory
            __m256 a_vec = _mm256_loadu_ps(&a[i]);
            __m256 b_vec = _mm256_loadu_ps(&b[i]);

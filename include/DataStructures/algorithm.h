@@ -40,7 +40,7 @@ namespace alpha {
 	}
 
 	template<class _Ty>
-	[[nodiscard]] inline constexpr _Ty pow(_Ty _Val, size_t _Count)noexcept {
+	[[nodiscard]] inline constexpr _Ty pow(_Ty _Val, _SizeType _Count)noexcept {
 		if (_Count == 0) return 1;
 		_Ty _Result = _Val; --_Count;
 		while (_Count) {
@@ -52,7 +52,7 @@ namespace alpha {
 	}
 
 	template<class _Ty, class _Fn>
-	[[nodiscard]] inline constexpr _Ty const_accumulate(_Ty _Val, size_t _Count, _Fn _Func)noexcept {
+	[[nodiscard]] inline constexpr _Ty const_accumulate(_Ty _Val, _SizeType _Count, _Fn _Func)noexcept {
 		if constexpr (_debug) if (_Count == 0) __debugbreak();
 		_Ty _Ans = _Val; --_Count;
 		while (_Count) {
@@ -82,7 +82,7 @@ namespace alpha {
 	}
 
 	/*export template<typename _Ty, typename _Fn>
-	constexpr void for_each_permutation(Array<_Ty>& _Container, size_t K, _Fn _Func)noexcept {
+	constexpr void for_each_permutation(Array<_Ty>& _Container, _SizeType K, _Fn _Func)noexcept {
 		unsigned int _Size = static_cast<unsigned int>(_Container.size());
 		if constexpr (_debug) if (K > _Size) __debugbreak();
 		Array<_Ty> _Permutation(K, _Ty());
@@ -172,7 +172,7 @@ namespace alpha {
 
 
 	//template<class Matrix>
-	//bool inverseMatrix(Matrix& A, Matrix& A_inv, size_t n) {
+	//bool inverseMatrix(Matrix& A, Matrix& A_inv, _SizeType n) {
 	//	const double eps = 1e-9;
 	//	vector<int> piv(n);
 	//	double det = 1;
