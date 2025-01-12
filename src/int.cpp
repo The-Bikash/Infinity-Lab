@@ -1,16 +1,10 @@
 #include "../include/Number/int.h"
 #include<stdio.h>
-
-#define putchar _print
-#define fputs _print
-#define console stdout
-#define __specialcompiler 0
-
 namespace alpha {
 
     using _MaxType = unsigned long long;
     using _SignedType = long long;
-    using _Htype = unsigned int;
+    using _MulType = unsigned int;
     using _SizeType = unsigned long long;
     using _PointerType = _BlockType*;
 
@@ -82,8 +76,6 @@ namespace alpha {
 
         return *this;
     }
-
-
     constexpr UnsignedInt& UnsignedInt::operator>>=(const _SizeType _Shift)noexcept {
         constexpr auto _BlockBits = 8 * sizeof(_Ptr[0]);
         const auto _BlockShift = _Shift / _BlockBits;
@@ -110,22 +102,22 @@ namespace alpha {
                 _Ptr[i] = (_Ptr[i] >> _BitShift) | _Carry;
                 _Carry = _NextCarry;
             }
-            if (_Siz != 1 && _Ptr[_Siz - 1] == 0)
+            if (_Siz > 1 && _Ptr[_Siz - 1] == 0)
                 --_Siz;
         }
 
         return *this;
     }
 
-    [[nodiscard]] UnsignedInt UnsignedInt::operator<<(const _SizeType that)const noexcept {
+    [[nodiscard]] UnsignedInt UnsignedInt::operator<<(const _SizeType _Shift)const noexcept {
         UnsignedInt _Tmp(*this);
-        _Tmp <<= that;
+        _Tmp <<= _Shift;
         return _Tmp;
     }
 
-    [[nodiscard]] UnsignedInt UnsignedInt::operator>>(const _SizeType that)const noexcept {
+    [[nodiscard]] UnsignedInt UnsignedInt::operator>>(const _SizeType _Shift)const noexcept {
         UnsignedInt _Tmp(*this);
-        _Tmp >>= that;
+        _Tmp >>= _Shift;
         return _Tmp;
     }
 
@@ -135,29 +127,43 @@ namespace alpha {
         memset(_Ptr + _Siz, 0, (_ThatSiz - _Siz) * sizeof(_SizeType));
     }
 
-    #define _BitwiseOperation(_Operator)\
-    if (_That._Siz > _Siz)\
-        _Update(_That._Siz);\
-    for (_SizeType i = 0; i < _That._Siz; ++i)\
-        _Ptr[i] _Operator _That._Ptr[i];\
-    return *this;
-
-    constexpr UnsignedInt& UnsignedInt::operator|=(const UnsignedInt& _That)noexcept {
-        if(this == &_That) return *this;
-        _BitwiseOperation(|=)
+    constexpr UnsignedInt& UnsignedInt::operator|=(const UnsignedInt& _That) noexcept {
+        if (_That._Siz > _Cap)
+            _Reallocate(_That._Siz);
+        if (_That._Siz > _Siz) {
+            for(_SizeType i = _Siz; i < _That._Siz; ++i)
+                _Ptr[i] = 0;
+            _Siz = _That._Siz;
+        }
+        for (_SizeType i = 0; i < _That._Siz; ++i)
+            _Ptr[i] |= _That._Ptr[i];
+        return *this;
     }
 
     constexpr UnsignedInt& UnsignedInt::operator&=(const UnsignedInt& _That)noexcept {
-        if(this == &_That) return *this;
-        _BitwiseOperation(&=)
+        if (_That._Siz > _Cap)
+            _Reallocate(_That._Siz);
+        if (_That._Siz > _Siz) {
+            for(_SizeType i = _Siz; i < _That._Siz; ++i)
+                _Ptr[i] = 0;
+            _Siz = _That._Siz;
+        }
+        for (_SizeType i = 0; i < _That._Siz; ++i)
+            _Ptr[i] &= _That._Ptr[i];
+        return *this;
     }
 
     constexpr UnsignedInt& UnsignedInt::operator^=(const UnsignedInt& _That)noexcept {
-        if(this == &_That) {
-            resize(1, 0);
-            return *this;
+        if (_That._Siz > _Cap)
+            _Reallocate(_That._Siz);
+        if (_That._Siz > _Siz) {
+            for(_SizeType i = _Siz; i < _That._Siz; ++i)
+                _Ptr[i] = 0;
+            _Siz = _That._Siz;
         }
-        _BitwiseOperation(^=)
+        for (_SizeType i = 0; i < _That._Siz; ++i)
+            _Ptr[i] ^= _That._Ptr[i];
+        return *this;
     }
 
     [[nodiscard]] UnsignedInt UnsignedInt::operator|(const UnsignedInt& _That)const noexcept {
@@ -179,27 +185,34 @@ namespace alpha {
     }
     
     
-    
-    
     constexpr UnsignedInt& UnsignedInt::operator+=(const UnsignedInt& _That)noexcept {
-        if (_That._Siz > _Siz) _Update(_That._Siz);
-        auto _Cary1 = false;
-        auto _Cary2 = false;
+        if (_That._Siz > _Cap)
+            _Reallocate(_That._Siz);
+        for (; _Siz < _That._Siz; ++_Siz)
+            _Ptr[_Siz] = 0;
+
+        bool _Cary1 = false;
+        bool _Cary2 = false;
         auto _Cache = _zero;
-        for (_SizeType i = 0; i < _That._Siz; ++i) {
+        auto i = _zero;
+
+        for (; i < _That._Siz; ++i) {
             _Cache = _Ptr[i] + _That._Ptr[i];
             _Cary2 = _Cache == _Tmax && _Cary1 ? true : _Cache < _Ptr[i];
             _Ptr[i] = _Cache + _Cary1;
             _Cary1 = _Cary2;
         }
-        for (auto i = _That._Siz; i < _Siz && _Cary1; ++i) {
+
+        for (; i < _Siz && _Cary1; ++i) {
             _Cary2 = _Ptr[i] == _Tmax;
             _Ptr[i] = _Ptr[i] + _Cary1;
             _Cary1 = _Cary2;
         }
+
         if (_Cary1) {
-            if (_Siz == _Cap) _Reallocate(_Siz + 1);
-            _Ptr[_Siz] = 1; ++_Siz;
+            if (_Siz == _Cap)
+                _Reallocate(_Siz + 1);
+            _Ptr[_Siz++] = 1;
         }
         return *this;
     }
@@ -236,425 +249,332 @@ namespace alpha {
 
     
     
-// void randomHex(char* buff, _SizeType size) {
-//     unsigned int seed = static_cast<unsigned int>(clock());
-//     const char hexcode[] = "0123456789abcdef";
-//     srand(seed);
-//     for (_SizeType i = 0; i < size; ++i) {
-//         seed ^= seed << 13;
-//         seed ^= seed >> 17;
-//         seed ^= seed << 5;
-//         buff[i] = hexcode[seed & 0xF];
-//     }
-// }
+    void randomHex(char* buff, _SizeType size) {
+        unsigned int seed = static_cast<unsigned int>(clock());
+        const char hexcode[] = "0123456789abcdef";
+        srand(seed);
+        for (_SizeType i = 0; i < size; ++i) {
+            seed ^= seed << 13;
+            seed ^= seed >> 17;
+            seed ^= seed << 5;
+            buff[i] = hexcode[seed & 0xF];
+        }
+    }
 
-_BlockType _Binary(const char _Hex){
-    if(_Hex >= '0' && _Hex <= '9') return _Hex - '0';
-    if(_Hex >= 'a' && _Hex <= 'f') return _Hex - 'a' + 10;
-    if(_Hex >= 'A' && _Hex <= 'F') return _Hex - 'A' + 10;
-    return 0;
-}
+    _BlockType _Binary(const char _Hex){
+        if(_Hex >= '0' && _Hex <= '9') return _Hex - '0';
+        if(_Hex >= 'a' && _Hex <= 'f') return _Hex - 'a' + 10;
+        if(_Hex >= 'A' && _Hex <= 'F') return _Hex - 'A' + 10;
+        return 0;
+    }
 
-const char* _Refine(const char* _Hex, _SizeType* _Len){
-    if(*_Len >= 2){
-        if(_Hex[0] == '0' && (_Hex[1] == 'x' || _Hex[1] == 'X')){
-            *_Len -= 2;
-            if(*_Len == 0){
-                perror("Invalid Number Only 0x");
-                exit(EXIT_FAILURE);
+    const char* _Refine(const char* _Hex, _SizeType* _Len){
+        if(*_Len >= 2){
+            if(_Hex[0] == '0' && (_Hex[1] == 'x' || _Hex[1] == 'X')){
+                *_Len -= 2;
+                if(*_Len == 0){
+                    perror("Invalid Number Only 0x");
+                    exit(EXIT_FAILURE);
+                }
+                return _Hex + 2;
             }
-            return _Hex + 2;
         }
+        return _Hex;
     }
-    return _Hex;
-}
 
-void _TransformHexToInt(const char* _Hex, _SizeType _Len, _BlockType* _Ptr){
-    const char* _Rbegin = _Hex + _Len - 1; 
-    const char* _Rend = _Hex - 1;
-    _SizeType _Siz = _Len / _TotalHex;
-    _SizeType i = 0;
-    for(; i < _Siz; ++i){
+    void _TransformHexToInt(const char* _Hex, _SizeType _Len, _BlockType* _Ptr){
+        const char* _Rbegin = _Hex + _Len - 1; 
+        const char* _Rend = _Hex - 1;
+        _SizeType _Siz = _Len / _TotalHex;
+        _SizeType i = 0;
+        for(; i < _Siz; ++i){
+            _Ptr[i] = 0;
+            for(char j = 0; j < _TotalHex; ++j)
+                _Ptr[i] |= _Binary(*(_Rbegin - j)) << (j * 4);
+            _Rbegin -= _TotalHex;
+        }
+        char shift = 0;
         _Ptr[i] = 0;
-        for(char j = 0; j < _TotalHex; ++j)
-            _Ptr[i] |= _Binary(*(_Rbegin - j)) << (j * 4);
-        _Rbegin -= _TotalHex;
-    }
-    char shift = 0;
-    _Ptr[i] = 0;
-    while(_Rbegin != _Rend){
-        _Ptr[i] |= _Binary(*_Rbegin) << shift;
-        --_Rbegin;
-        shift += 4;
-    }
-}
-
-UnsignedInt::UnsignedInt (const char* _Hex){
-    _SizeType _Len = strlen(_Hex);
-    _Hex = _Refine(_Hex, &_Len);
-    _Siz = _Len / _TotalHex + 1;
-    _Allocate(_Siz);
-    _TransformHexToInt(_Hex, _Len, _Ptr);
-}
-
-void UnsignedInt::print(FILE* _FILE)const {
-    static const unsigned char _hexcode[] = "0123456789abcdef";
-    #define _BuffSiz  1023
-    unsigned char _Buffer[_BuffSiz + 1];
-    const unsigned char* _Data = (const unsigned char*)_Ptr;
-    _SignedType i = _Siz * sizeof(_BlockType) - 1;
-    while(_Data[i] == 0 && i >= 1) --i;
-
-    _SignedType _idx = 0;
-    _Buffer[_idx++] = '0'; _Buffer[_idx++] = 'x';
-    const unsigned char _Ch = _hexcode[_Data[i] >> 4];
-    if(_Ch != '0') _Buffer[_idx++] = _Ch;
-    _Buffer[_idx++] = _hexcode[_Data[i] & 0x0f];
-    --i;
-    for(; i >= 0; --i){
-        _Buffer[_idx++] = _hexcode[_Data[i] >> 4];
-        _Buffer[_idx++] = _hexcode[_Data[i] & 0x0f];
-
-        if(_idx >= _BuffSiz){
-            fwrite(_Buffer, 1, _idx, _FILE);
-            _idx = 0;
+        while(_Rbegin != _Rend){
+            _Ptr[i] |= _Binary(*_Rbegin) << shift;
+            --_Rbegin;
+            shift += 4;
         }
     }
-    fwrite(_Buffer, 1, _idx, _FILE);
+
+    UnsignedInt::UnsignedInt (const char* _Hex){
+        _SizeType _Len = strlen(_Hex);
+        _Hex = _Refine(_Hex, &_Len);
+        _Siz = _Len / _TotalHex + 1;
+        _Allocate(_Siz);
+        _TransformHexToInt(_Hex, _Len, _Ptr);
+    }
+
+    void UnsignedInt::print(FILE* _FILE)const {
+        static const unsigned char _hexcode[] = "0123456789abcdef";
+        #define _BuffSiz  1023
+        unsigned char _Buffer[_BuffSiz + 1];
+        const unsigned char* _Data = (const unsigned char*)_Ptr;
+        _SignedType i = _Siz * sizeof(_BlockType) - 1;
+        while(_Data[i] == 0 && i >= 1) --i;
+        _SignedType _idx = 0;
+        _Buffer[_idx++] = '0'; _Buffer[_idx++] = 'x';
+        const unsigned char _Ch = _hexcode[_Data[i] >> 4];
+        if(_Ch != '0') _Buffer[_idx++] = _Ch;
+        _Buffer[_idx++] = _hexcode[_Data[i] & 0x0f];
+        --i;
+        for(; i >= 0; --i){
+            _Buffer[_idx++] = _hexcode[_Data[i] >> 4];
+            _Buffer[_idx++] = _hexcode[_Data[i] & 0x0f];
+
+            if(_idx >= _BuffSiz){
+                fwrite(_Buffer, 1, _idx, _FILE);
+                _idx = 0;
+            }
+        }
+        fwrite(_Buffer, 1, _idx, _FILE);
+    }
+
+    void _print(const UnsignedInt& x) {
+        x.print(stdout);
+    }
+
+namespace SchoolBook {
+    void mul(_MulType* _Ans, const _MulType* _First, const _MulType* _Secnd, const _SizeType _Siza, const _SizeType _Sizb) {
+        _SizeType i, j;
+        _MulType _Carry;
+        _MaxType _Block;
+
+        for (i = 0; i < _Sizb; ++i) {
+            if(_Secnd[i] != 0){
+                _Carry = 0;
+                for (j = 0; j < _Siza; ++j) {
+                    _Block = static_cast<_MaxType>(_Secnd[i]) * _First[j] + _Ans[i + j] + _Carry;
+                    _Ans[i + j] = _Block;
+                    _Carry = _Block >> (sizeof(_MulType) * 8);
+                }
+                _Ans[i + _Siza] += _Carry;
+            }
+        }
+    }
 }
 
-void _print(const UnsignedInt& x) {
-    x.print(stdout);
-}
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-//     constexpr UnsignedInt& UnsignedInt::operator*=(const UnsignedInt& _That)noexcept {
-//         return *this;
+
+namespace Karatsuba {
+    void _SwapForKaratsuba(_BlockType* x0y1, const _SizeType _Lsiz, const _SizeType _Rsiz) {
+        //This _Swap function particularly optimise fo karatsuba multiplication
+        //Assumed that _Rsiz >= _Lsiz;
+        _BlockType _Tmp; _SizeType i;
+        if (_Lsiz == _Rsiz) {
+            for (i = 0; i < _Rsiz; ++i) {
+                _Tmp = x0y1[i];
+                x0y1[i] = x0y1[_Rsiz + i];
+                x0y1[_Rsiz + i] = _Tmp;
+            }
+            return;
+        }
+        _Tmp = *x0y1;
+        for (i = 1; i <= _Lsiz; ++i) {
+            x0y1[i - 1] = x0y1[i + _Lsiz];
+            x0y1[i + _Lsiz] = x0y1[i];
+        }
+        x0y1[_Lsiz] = _Tmp;
+    }
+
+    _SizeType _AdditionForKaratsuba(const _BlockType* A, const _SizeType _Siza, const _BlockType* B, const _SizeType _Sizb, _BlockType* _Buff) {
+        // This Addition function optimise for particular karatsuba multiplication;
+        // Assumed that _Siza >= _Sizb;
+        // It's store the result of A + B in Buff and return the length of result(Size of BUFF);
+    #if GREEN_FLAG
+        _MaxType _Block;
+        _BlockType _Carry = 0;
+        _SizeType i = 0;
+
+        for (; i < _Sizb; ++i) {
+            _Block = (_MaxType)A[i] + B[i] + _Carry;
+            _Buff[i] = _Block;
+            _Carry = _Block >> (sizeof(_BlockType) * 8);
+        }
+    #else
+        _BlockType _Cache;
+        bool _Carry = false;
+        _SizeType i = 0;
+        for (; i < _Sizb; ++i) {
+            _Cache = A[i] + B[i];
+            _Buff[i] = _Cache + _Carry;
+            _Carry = _Cache == _Tmax && _Carry ? 1 : _Cache < A[i];
+        }
+    #endif
+        for (; _Carry & (i < _Siza); ++i) {
+            _Buff[i] = A[i] + 1;
+            _Carry = _Buff[i] == 0;
+        }
+        if (_Carry) {
+            _Buff[i] = 1; return ++i;
+        }
+        while (i < _Siza) {
+            _Buff[i] = A[i];
+            ++i;
+        }
+        return i;
+    }
+
+    void _InPlaceAdditionForKaratsuba(_BlockType* A, const _BlockType* const B, const _SizeType _Sizb) {
+        // This function mimics the operation A += B.
+        // Assumed that _Siza > _Sizb
+    #if GREEN_FLAG
+        _MaxType _Block = 0;
+        _BlockType _Carry = 0;
+        _SizeType i = 0;
+        for (; i < _Sizb; ++i) {
+            _Block = (_MaxType)A[i] + B[i] + _Carry;
+            A[i] = _Block;
+            _Carry = _Block >> (sizeof(_BlockType) * 8);
+        }
+    #else
+        _BlockType _Cache = 0;
+        bool _Carry = false;
+        _SizeType i = 0;
+        for (; i < _Sizb; ++i) {
+            _Cache = A[i] + B[i];
+            A[i] = _Cache + _Carry;
+            _Carry = _Cache == _Tmax && _Carry ? 1 : _Cache < B[i];
+        }
+    #endif
+        if (_Carry) for (++A[i]; A[i] == 0; ++A[++i]) {}
+
+    }
+    _SizeType _InPlaceSubtractionForKaratsuba(_BlockType* A, _SizeType _SizA, const _BlockType* const B, _SizeType _SizB) {
+        // This function mimic the operator -=.
+        // Assumed that Integer A > Integer B;
+
+        bool _Brrw1 = false;
+        bool _Brrw2 = false;
+        _SizeType i = 0;
+        for (; i < _SizB; ++i) {
+            _Brrw2 = A[i] == B[i] && _Brrw1 ? 1 : A[i] < B[i];
+            A[i] = A[i] - B[i] - _Brrw1;
+            _Brrw1 = _Brrw2;
+        }
+
+
+        if (_Brrw1) {
+            for (; A[i] == 0; ++i)
+                A[i] = _Tmax;
+            --A[i];
+        }
+
+        if (A[_SizA - 1] == 0) --_SizA;
+
+        return _SizA;
+
+    }
+
+    _SizeType _MakeEqualLength(_BlockType* xy, const _SizeType Ly, const _SizeType Lx) {
+        const _SizeType _Siz = Ly + Lx;
+        if (Ly > Lx) {
+            const _SizeType d = Ly - Lx;
+            for (_SizeType i = 0; i < d; ++i)
+                xy[_Siz + i] = 0;
+            return Ly;
+        }
+        _SignedType d = Lx - Ly;
+        for (_SignedType i = _Siz - 1; i >= Ly; --i)
+            xy[i + d] = xy[i];
+        while (d--)
+            xy[Ly + d] = 0;
+        return Lx;
+    }
+
+    void _SchoolBookMul(_MulType* _Ans, const _MulType* _First, const _MulType* _Secnd, _SizeType _Siz) {
+        // Assumed that both array are equal size;
+        _SizeType i, j;
+        for (i = 0; i < _Siz * 2; ++i) _Ans[i] = 0;
+        _MulType _Carry = 0;
+        _MaxType _Block;
+
+        for (i = 0; i < _Siz; ++i) {
+            if (_First[i] != 0) {
+                _Carry = 0;
+                for (j = 0; j < _Siz; ++j) {
+                    _Block = static_cast<_MaxType>(_First[i]) * _Secnd[j] + _Ans[i + j] + _Carry;
+                    _Ans[i + j] = static_cast<_MulType>(_Block);
+                    _Carry = _Block >> (sizeof(_MulType) * 8);
+                }
+                _Ans[i + _Siz] += _Carry;
+            }
+        }
+    }
+
+    void _KaratSubaMul(_BlockType* x1y1x0y0, _SizeType n, _BlockType* P) {
+        #if MODE == DEBRUP_DA_ASSIGNMENT && GREEN_FLAG && MODE != PERFORMANCE
+            if (n == 1) {
+                *((_MaxType*)x1y1x0y0) = (_MaxType)x1y1x0y0[0] * x1y1x0y0[1];
+                return;
+            }
+        #else
+            if (n <= 32) {
+        #if GREEN_FLAG
+                _SchoolBookMul(P, x1y1x0y0 + n, x1y1x0y0, n);
+        #else
+                _SchoolBookMul((_MulType*)P, (_MulType*)(x1y1x0y0 + n), (_MulType*)x1y1x0y0, n * 2);
+        #endif
+                memcpy(x1y1x0y0, P, n * 2 * sizeof(_BlockType));
+                return;
+            }
+        #endif
+
+        _SizeType _Lsiz = n >> 1, _Rsiz = n - _Lsiz;
+        _PointerType x1y1 = x1y1x0y0 + _Lsiz * 2;
+        _SwapForKaratsuba(x1y1x0y0 + _Lsiz, _Lsiz, _Rsiz); // O(n) with very low constant
+        _SizeType L1 = _AdditionForKaratsuba(x1y1, _Rsiz, x1y1x0y0, _Lsiz, P); // store y1 + y0 in First half of P
+        _SizeType L2 = _AdditionForKaratsuba(x1y1 + _Rsiz, _Rsiz, x1y1x0y0 + _Lsiz, _Lsiz, P + L1); // store x1 + x0 in second half of P
+        if (L1 != L2)
+            L1 = _MakeEqualLength(P, L1, L2); // Best case O(1), worst case O(n) with very low constant
+        _PointerType _Memory = P + L1 * 2;
+        _KaratSubaMul(P, L1, _Memory); // P = (y1 + y0)(x1 + x0);
+        _KaratSubaMul(x1y1, _Rsiz, _Memory); // x1y1 = x1*y1;
+        _KaratSubaMul(x1y1x0y0, _Lsiz, _Memory); // x0y0 = x0 * y0
+        L1 = _InPlaceSubtractionForKaratsuba(P, L1 * 2, x1y1, _Rsiz * 2); // p -= x1y1;
+        L1 = _InPlaceSubtractionForKaratsuba(P, L1, x1y1x0y0, _Lsiz * 2);  // p -= x0y0;
+        // x1y1x0y0 = x1y1 * 2 ^ n + x0y0; So we don't need to add any additional zeros behind x1y1.
+        _InPlaceAdditionForKaratsuba(x1y1x0y0 + _Lsiz, P, L1); // ==> x1y1x0y0 += p * 2^n/2;
+    }
+
+#define _SCHOOL_BOOK_THRESHOLD 54
+#define _KARATSUBA_THRESHOLD 10000000000000
+
+// void Mul(UnsignedInt a, UnsignedInt b, UnsignedInt c){
+//     _PointerType _Tmp1 = b._Ptr, _Tmp2 = a._Ptr;
+//     _SizeType _MaxSize = b._Siz, _MinSize = a._Siz;
+
+//     if(a._Siz > b._Siz) {
+//         _Tmp1 = a._Ptr;
+//         _Tmp2 = b._Ptr;
+//         _MaxSize = a._Siz;
+//         _MinSize = b._Siz;
 //     }
 
-//     constexpr UnsignedInt& UnsignedInt::operator/=(const UnsignedInt& _That)noexcept {
-//         return *this;
+//     if(_MaxSize + _MinSize <= _SCHOOL_BOOK_THRESHOLD * 2) {
+//         c._Siz = a._Siz + b._Siz;
+        
+//         _SchoolBookMulGen(c._Ptr, _Tmp1, _Tmp2, _MaxSize, _MinSize);
 //     }
 
-//     constexpr UnsignedInt& UnsignedInt::operator%=(const UnsignedInt& _That)noexcept {
-//         return *this;
+//     else if(_MaxSize <= _KARATSUBA_THRESHOLD) {
+//         c._Siz = _MaxSize * 2;
+//         memcpy(c._Ptr, _Tmp1, _MaxSize * sizeof(_BlockType));
+//         memcpy(c._Ptr + _MaxSize, _Tmp2, _MinSize * sizeof(_BlockType));
+//         memset(c._Ptr + _MaxSize + _MinSize, 0, (_MaxSize - _MinSize) * sizeof(_BlockType));
+
+//         _PointerType _Pool = static_cast<_PointerType>(operator new[]((c._Siz + 100) * sizeof(_BlockType)));
+        
+//         _KaratSubaMul(c._Ptr, _MaxSize, _Pool);
+        
+//         operator delete[](_Pool);
 //     }
 
-
-
-
-
-
-//     void _print(const UnsignedInt& _That)noexcept {
-//         char _Buff[_bits + 1]{};
-//         _Buff[_bits] = '\0';
-//         _MaxType _Mask = 0;
-//         _MaxType _Tmp = 1; _Tmp <<= (_bits - 1);
-//         for (_SignedType i = _That._Siz - 1; i >= 0; --i) {
-//             _Mask = _Tmp;
-//             for (auto j = 0; j < _bits; ++j) {
-//                 _Buff[j] = (_That._Ptr[i] & _Mask) ? '1' : '0';
-//                 _Mask >>= 1;
-//             }
-//             //fputs(_Buff, console);
-//         }
-//     }
-
-//     inline void Add(UnsignedInt& _Answr, const UnsignedInt& _First, const UnsignedInt& _Secnd)noexcept {
-//         _MaxType* _This = 0;
-//         _SizeType  _Siza = 0;
-//         _MaxType* _That = 0;
-//         _SizeType  _Sizb = 0;
-
-//         if (_First._Siz >= _Secnd._Siz) {
-//             _This = _First._Ptr;
-//             _That = _Secnd._Ptr;
-//             _Siza = _First._Siz;
-//             _Sizb = _Secnd._Siz;
-//         }
-//         else {
-//             _That = _First._Ptr;
-//             _This = _Secnd._Ptr;
-//             _Sizb = _First._Siz;
-//             _Siza = _Secnd._Siz;
-//         }
-
-//         auto _Cache = _zero;
-//         auto _Cary1 = false;
-//         auto _Cary2 = false;
-
-//         if (_Siza >= _Answr._Cap) {
-//             free(_Answr._Ptr);
-//             _Answr._Alloc(_Siza + 1);
-//         } _Answr._Siz = _Siza;
-
-//         for (_SizeType i = 0; i < _Sizb; ++i) {
-//             _Cache = _This[i] + _That[i];
-//             _Cary2 = _Cache == _Tmax && _Cary1 ? true : _Cache < _This[i];
-//             _Answr._Ptr[i] = _Cache + _Cary1;
-//             _Cary1 = _Cary2;
-//         }
-//         for (auto i = _Sizb; i < _Siza && _Cary1; ++i) {
-//             _Cary2 = _This[i] == _Tmax;
-//             _Answr._Ptr[i] = _This[i] + _Cary1;
-//             _Cary1 = _Cary2;
-//         }
-//         if (_Cary1) {
-//             _Answr._Ptr[_Answr._Siz] = 1; ++_Answr._Siz;
-//         }
-//     }
-
-// #if false
-//     void mul(Const dynamic_unsigned_int& _Answr,
-//         const dynamic_unsigned_int& _First,
-//         const dynamic_unsigned_int& _Secnd)noexcept
-//     {
-//         _Answr = _First._Siz + _Secnd._Siz;
-
-//         dynamic_unsigned_int::_MaxType i, j, _Slot, _Cche;
-//         auto _Cary = dynamic_unsigned_int::_zero;
-//         auto _Cry1 = false;
-//         auto _Cry2 = false;
-//         __uint128_t _Blck;
-//         auto _Vlue = _Secnd._Ptr[0];
-
-//         std::memset(_Answr._Ptr + _First._Siz, 0, _Secnd._Siz << 3);
-
-//         for (i = 0; i < _First._Siz; ++i) {
-//             _Blck = _First._Ptr[i];
-//             _Blck = _Blck * _Vlue + _Cary;
-//             _Cary = _Blck >> 64;
-//             _Answr._Ptr[i] = _Blck & dynamic_unsigned_int::_Tmax;
-//         }   _Answr._Ptr[i] = _Cary;
-
-//         for (i = 1; i < _Secnd._Siz; ++i) {
-//             _Vlue = _Secnd._Ptr[i];
-//             if (_Vlue != 0) {
-//                 _Cary = 0; _Answr._Siz = i; _Cry1 = 0;
-//                 for (j = 0; j < _First._Siz; ++j) {
-//                     _Blck = _First._Ptr[j];
-//                     _Blck = _Blck * _Vlue + _Cary;
-//                     _Cary = _Blck >> 64;
-//                     _Slot = _Blck & dynamic_unsigned_int::_Tmax;
-//                     _Cche = _Answr._Ptr[_Answr._Siz] + _Slot;
-//                     _Cry2 = _Cche == dynamic_unsigned_int::_Tmax && _Cry1 ? true : _Cche < _Answr._Ptr[_Answr._Siz];
-//                     _Answr._Ptr[_Answr._Siz] = _Cche + _Cry1;
-//                     _Cry1 = _Cry2; ++_Answr._Siz;
-//                 }
-//                 if (_Cary != 0 && _Cry1) {
-//                     _Answr._Ptr[_Answr._Siz] = _Cary + _Cry1; ++_Answr._Siz;
-//                     if (_Cary == dynamic_unsigned_int::_Tmax) {
-//                         _Answr._Ptr[_Answr._Siz] = 1; ++_Answr._Siz;
-//                     }
-//                 }
-//                 else if (_Cary) {
-//                     _Answr._Ptr[_Answr._Siz] = _Cary; ++_Answr._Siz;
-//                 }
-//                 else if (_Cry1) {
-//                     _Answr._Ptr[_Answr._Siz] = 1; ++_Answr._Siz;
-//                 }
-//             }
-//         }
-//     }
-// #else 
-//     /*inline void mul(dynamic_unsigned_int& _Answr, const dynamic_unsigned_int& _First, const dynamic_unsigned_int& _Secnd)noexcept {
-//         _Answr = _First._Siz + _Secnd._Siz;
-
-//         auto _Tspt = reinterpret_cast<dynamic_unsigned_int::_Htype*>(_First._Ptr);
-//         auto _Ttpt = reinterpret_cast<dynamic_unsigned_int::_Htype*>(_Secnd._Ptr);
-//         auto _A = reinterpret_cast<dynamic_unsigned_int::_Htype*>(_Answr._Ptr);
-
-//         auto _Tssz = _First._Siz << 1; _Tssz -= (_Tspt[_Tssz - 1] == 0);
-//         auto _Ttsz = _Secnd._Siz << 1; _Ttsz -= (_Ttpt[_Ttsz - 1] == 0);
-
-//         dynamic_unsigned_int::_Htype _Slot, _Cche, _Vlue = _Ttpt[0], _Cary = 0U;
-//         dynamic_unsigned_int::_MaxType _Blck;
-//         dynamic_unsigned_int::_SizeType i, j, I = 0;
-
-//         auto _Cry1 = false;
-//         auto _Cry2 = false;
-
-//         iq::memset(_A + _Tssz, 0, (_Ttsz + 1) << _hshft);
-
-//         for (i = 0; i < _Tssz; ++i) {
-//             _Blck = _Tspt[i];
-//             _Blck = _Blck * _Vlue + _Cary;
-//             _Cary = _Blck >> _hbits;
-//             _A[i] = _Blck & _Hmax;
-//         }   _A[i] = _Cary;
-
-//         for (i = 1; i < _Ttsz; ++i) {
-//             _Vlue = _Ttpt[i];
-//             if (_Vlue != 0) {
-//                 _Cary = 0; I = i; _Cry1 = 0;
-//                 for (j = 0; j < _Tssz; ++j) {
-//                     _Blck = _Tspt[j];
-//                     _Blck = _Blck * _Vlue + _Cary;
-//                     _Cary = _Blck >> _hbits;
-//                     _Slot = _Blck & _Hmax;
-
-//                     _Cche = _A[I] + _Slot;
-//                     _Cry2 = _Cche == _Hmax && _Cry1 ? true : _Cche < _A[I];
-//                     _A[I] = _Cche + _Cry1;
-//                     _Cry1 = _Cry2; ++I;
-//                 }
-//                 if (_Cary != 0 && _Cry1) {
-//                     _A[I] = _Cary + _Cry1; ++I;
-//                     if (_Cary == _Hmax) {
-//                         _A[I] = 1; ++I;
-//                     }
-//                 }
-//                 else if (_Cary) {
-//                     _A[I] = _Cary; ++I;
-//                 }
-//                 else if (_Cry1) {
-//                     _A[I] = 1; ++I;
-//                 }
-//             }
-//         }
-//         _Answr._Siz = I & 1 ? (++I) >> 1 : I >> 1;
-//     }*/
-// #endif
-//     /* inline unsigned int* _Addition(unsigned int* _Num1, unsigned int _Siz1, unsigned int* _Num2, unsigned int _Siz2, unsigned int& _Siz) {
-//          auto _Ptr = (unsigned int*)std::malloc((_SizeType)(_Siz1 + 1) << 2); _Ptr[_Siz1] = 0;
-//          auto _Cary1 = false;
-//          auto _Cary2 = false;
-//          auto _Cache = 0U;
-//          for (auto i = 0U; i < _Siz2; ++i) {
-//              _Cache = _Num1[i] + _Num2[i];
-//              _Cary2 = _Cache == UINT32_MAX && _Cary1 ? true : _Cache < _Num1[i];
-//              _Ptr[i] = _Cache + _Cary1;
-//              _Cary1 = _Cary2;
-//          }
-//          for (auto i = _Siz2; i < _Siz1 && _Cary1; ++i) {
-//              _Cary2 = _Num1[i] == UINT32_MAX;
-//              _Ptr[i] = _Num1[i] + _Cary1;
-//              _Cary1 = _Cary2;
-//          }
-//          _Siz = _Siz1;
-//          if (_Cary1) {
-//              _Ptr[_Siz] = 1; ++_Siz;
-//          } return _Ptr;
-//      }
-
-//      void _Print(unsigned int* _Ptr, unsigned int _Siz)noexcept {
-//          char _Buff[33]{}; _Buff[32] = '\0';
-//          auto _Mask = 0ULL;
-//          for (int i = _Siz - 1; i >= 0; --i) {
-//              _Mask = 0b10000000000000000000000000000000;
-//              for (auto j = 0; j < 32; ++j) {
-//                  _Buff[j] = (_Ptr[i] & _Mask) ? '1' : '0';
-//                  _Mask >>= 1;
-//              }
-//              std::fputs(_Buff, stdout);
-//          }
-
-//      }
-
-//      dynamic_unsigned_int _Karatsuba2(unsigned int* _Num1, unsigned int _Siz1, unsigned int* _Num2, unsigned int _Siz2);
-
-//      dynamic_unsigned_int _Karatsuba1(unsigned int* _Num1, unsigned int* _Num2, unsigned int _Idx) {
-
-//          if (_Idx == 1) return { ((_SizeType)(*_Num1)) * (*_Num2) };
-
-//          auto _Idx1 = _Idx / 2;
-//          auto _Idx2 = _Idx - _Idx1;
-
-//          dynamic_unsigned_int _BD = _Karatsuba1(_Num1, _Num2, _Idx1);
-//          dynamic_unsigned_int _AC = _Karatsuba1(_Num1 + _Idx1, _Num2 + _Idx1, _Idx2);
-
-//          unsigned int _A_PLUS_B_SIZ; auto _A_PLUS_B = _Addition(_Num1 + _Idx1, _Idx2, _Num1, _Idx1, _A_PLUS_B_SIZ);
-//          unsigned int _C_PLUS_D_SIZ; auto _C_PLUS_D = _Addition(_Num2 + _Idx1, _Idx2, _Num2, _Idx1, _C_PLUS_D_SIZ);
-
-//          dynamic_unsigned_int _AD_PLUS_BC = _Karatsuba2(_A_PLUS_B, _A_PLUS_B_SIZ, _C_PLUS_D, _C_PLUS_D_SIZ);
-
-//          std::free(_A_PLUS_B);
-//          std::free(_C_PLUS_D);
-
-//          _AD_PLUS_BC -= _AC;
-//          _AD_PLUS_BC -= _BD;
-//          _AD_PLUS_BC <<= _Idx1 << 5;
-
-//          _AC <<= _Idx1 << 6;
-
-//          _AC += _AD_PLUS_BC;
-//          _AC += _BD;
-
-//          return _AC;
-
-//      }
-
-//      dynamic_unsigned_int _Karatsuba2(unsigned int* _Num1, unsigned int _Siz1, unsigned int* _Num2, unsigned int _Siz2) {
-//          if (_Siz2 < _Siz1) {
-//              for (; _Siz2 < _Siz1; ++_Siz2)
-//                  _Num2[_Siz2] = 0;
-//          } else if (_Siz1 < _Siz2) {
-//              for (; _Siz1 < _Siz2; ++_Siz1)
-//                  _Num1[_Siz1] = 0;
-//          }
-//          auto _Idx = _Siz1;
-//          auto _Idx1 = _Idx / 2;
-//          auto _Idx2 = _Idx - _Idx1;
-
-//          if (_Idx == 1) return { ((_SizeType)(*_Num1)) * (*_Num2) };
-
-//          dynamic_unsigned_int _BD = _Karatsuba1(_Num1, _Num2, _Idx1);
-//          dynamic_unsigned_int _AC = _Karatsuba1(_Num1 + _Idx1, _Num2 + _Idx1, _Idx2);
-
-//          unsigned int _A_PLUS_B_SIZ;
-//          unsigned int _C_PLUS_D_SIZ;
-
-//          auto _A_PLUS_B = _Addition(_Num1 + _Idx1, _Idx2, _Num1, _Idx1, _A_PLUS_B_SIZ);
-//          auto _C_PLUS_D = _Addition(_Num2 + _Idx1, _Idx2, _Num2, _Idx1, _C_PLUS_D_SIZ);
-
-//          dynamic_unsigned_int _AD_PLUS_BC = _Karatsuba2(_A_PLUS_B, _A_PLUS_B_SIZ, _C_PLUS_D, _C_PLUS_D_SIZ);
-
-//          std::free(_A_PLUS_B);
-//          std::free(_C_PLUS_D);
-
-//          _AD_PLUS_BC -= _AC;
-//          _AD_PLUS_BC -= _BD;
-//          _AD_PLUS_BC <<= _Idx1 << 5;
-
-//          _AC <<= _Idx1 << 6;
-
-//          _AC += _AD_PLUS_BC;
-//          _AC += _BD;
-
-//          return _AC;
-
-//      }
-
-//      dynamic_unsigned_int karatsuba(dynamic_unsigned_int& _This, dynamic_unsigned_int& _That)noexcept {
-
-//          auto _Size = dynamic_unsigned_int::_Fndsiz(_This._Siz);
-
-//          std::memset(_This._Ptr + _This._Siz, 0, (_SizeType)(_Size - _This._Siz) << 3);
-//          std::memset(_That._Ptr + _That._Siz, 0, (_SizeType)(_Size - _That._Siz) << 3);
-
-//          auto _Num1 = reinterpret_cast<unsigned int*>(_This._Ptr);
-//          auto _Num2 = reinterpret_cast<unsigned int*>(_That._Ptr);
-//          _Size <<= 1;
-
-//          dynamic_unsigned_int _Res = _Karatsuba1(_Num1, _Num2, _Size);
-
-//          for (; _Res._Ptr[_Res._Siz - 1] == 0 && _Res._Siz > 0; --_Res._Siz);
-
-
-
-//          return _Res;
-
-//      }*/
-// };
+//     for (; c._Ptr[c._Siz- 1] == 0 && c._Siz > 1; --c._Siz) {}
+// }
 
 }

@@ -7,7 +7,7 @@
 
 // export namespace alpha {
 //     using _SignedType = long long;
-//     using _Htype = unsigned long long;
+//     using _MulType = unsigned long long;
 //     using _SizeType = unsigned long long;
 
 //     class UnsignedInt {
