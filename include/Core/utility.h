@@ -248,28 +248,10 @@ namespace alpha {
 }
 
 namespace alpha {
-	using ::std::align_val_t;
-	using ::std::nothrow_t;
-	using ::std::nothrow;
-
-	using ::operator new;
-	using ::operator new[];
-	using ::operator delete;
-	using ::operator delete[];
-
-#ifdef __cpp_aligned_new
-	using ::std::align_val_t;
-	using ::operator new;
-	using ::operator new[];
-	using ::operator delete;
-	using ::operator delete[];
-#endif
-
 	template<class _Ty, class... _Args>
 	inline void construct(_Ty* _Ptr, _Args&&... _Val) {
 		new(_Ptr) _Ty(forward<_Args>(_Val)...);
 	}
-
 }
 namespace alpha {
 	template<class _Ty> using initializer = std::initializer_list<_Ty>;
